@@ -6,12 +6,13 @@ import { useXP } from '../context/XPProvider';
 import { supabase } from '../lib/supabase';
 import { ChakraType, Sigil } from '../types';
 import { motion } from 'framer-motion';
-import { Compass, Zap, Eye, Calendar, Plus, Info, Download, RefreshCw } from 'lucide-react';
+import { Compass, Zap, Eye, Calendar, Plus, Info, Download, RefreshCw, Maximize, Box, ArrowUpRight, Sparkles } from 'lucide-react';
 import useImage from 'use-image';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 import AnimatedGlyph from '../components/ui/AnimatedGlyph';
 import FloatingFormulas from '../components/ui/FloatingFormulas';
+import SymbolCanvas from '../components/ui/SymbolCanvas';
 
 interface TimelineNode {
   id: string;
@@ -59,6 +60,8 @@ const EchoCompassPage: React.FC = () => {
   const [intention, setIntention] = useState('Navigate Sacred Timelines');
   const [showEvolution, setShowEvolution] = useState(false);
   const [evolutionHistory, setEvolutionHistory] = useState<Sigil[]>([]);
+  const [showGridMap, setShowGridMap] = useState(false);
+  const [resonanceLevel, setResonanceLevel] = useState(0);
   
   // Timeline nodes with sacred geometry positioning
   const timelineNodes: TimelineNode[] = [
@@ -109,6 +112,31 @@ const EchoCompassPage: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Calculate resonance level
+  useEffect(() => {
+    // Increase resonance if sigils are placed in timeline nodes
+    const alignedSigils = sigilPositions.filter(pos => pos.timelineNodeId);
+    let baseResonance = alignedSigils.length * 20; // 20% per aligned sigil
+    
+    // Add additional resonance based on user level
+    const levelBonus = Math.min(level * 5, 30); // Max 30% from level
+    
+    // Add extra resonance for Tesla number frequencies
+    const teslaBonus = sigilPositions.filter(pos => {
+      const freq = pos.sigil.parameters.frequency.toString();
+      return freq.includes('3') || freq.includes('6') || freq.includes('9');
+    }).length * 5; // 5% per Tesla frequency
+    
+    // Add resonance for chakra alignment with nodes
+    const chakraBonus = alignedSigils.filter(pos => {
+      const node = timelineNodes.find(n => n.id === pos.timelineNodeId);
+      return node && pos.sigil.parameters.chakra === node.chakra;
+    }).length * 10; // 10% per aligned chakra
+    
+    const totalResonance = Math.min(baseResonance + levelBonus + teslaBonus + chakraBonus, 100);
+    setResonanceLevel(totalResonance);
+  }, [sigilPositions, level]);
   
   const fetchUserSigils = async () => {
     if (!user) return;
@@ -590,6 +618,39 @@ const EchoCompassPage: React.FC = () => {
             )}
           </motion.div>
           
+          {/* Resonance Meter */}
+          <motion.div
+            className="bg-dark-200 p-4 rounded-2xl border border-dark-300 shadow-chakra-glow"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="flex items-center mb-3">
+              <Sparkles size={20} className="mr-2" style={{ color: chakraState.color }} />
+              <h3 className="text-lg font-medium text-white">Quantum Resonance</h3>
+            </div>
+            
+            <div className="mb-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Field Stability</span>
+                <span className="text-white">{resonanceLevel}%</span>
+              </div>
+              <div className="w-full h-2 bg-dark-300 rounded-full mt-1 overflow-hidden">
+                <motion.div 
+                  className="h-full"
+                  style={{ backgroundColor: chakraState.color }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${resonanceLevel}%` }}
+                  transition={{ duration: 1 }}
+                />
+              </div>
+            </div>
+            
+            <p className="text-xs text-gray-400 mt-2">
+              Align sigils with their resonant timeline nodes to increase field stability
+            </p>
+          </motion.div>
+          
           {/* Create New Sigil */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -618,15 +679,25 @@ const EchoCompassPage: React.FC = () => {
             <div className="p-4 border-b border-dark-300">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-white">Sacred Timeline Navigation</h3>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">Active Chakra:</span>
-                  <div 
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: chakraState.color }}
-                  />
-                  <span className="text-sm" style={{ color: chakraState.color }}>
-                    {chakraState.type}
-                  </span>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-400 mr-2">Active Chakra:</span>
+                    <div 
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: chakraState.color }}
+                    />
+                    <span className="text-sm ml-1" style={{ color: chakraState.color }}>
+                      {chakraState.type}
+                    </span>
+                  </div>
+                  
+                  <button 
+                    className="p-1.5 rounded-full bg-dark-300 text-gray-300 hover:text-white"
+                    onClick={() => setShowGridMap(!showGridMap)}
+                    title={showGridMap ? "Show Timeline Map" : "Show Grid Map"}
+                  >
+                    {showGridMap ? <Compass size={18} /> : <Box size={18} />}
+                  </button>
                 </div>
               </div>
             </div>
@@ -637,64 +708,104 @@ const EchoCompassPage: React.FC = () => {
                 <FloatingFormulas density="low" />
               </div>
               
-              <Stage 
-                width={compassSize.width} 
-                height={compassSize.height}
-                ref={stageRef}
-                style={{ backgroundColor: '#1a1a2e' }}
-              >
-                <Layer>
-                  {/* Background sacred geometry */}
-                  {renderBackground()}
-                  
-                  {/* Timeline Nodes */}
-                  {timelineNodes.map((node) => (
-                    <Group key={node.id} x={node.x} y={node.y}>
-                      <Circle
-                        radius={60}
-                        fill={`${node.color}20`}
-                        stroke={node.color}
-                        strokeWidth={selectedNode === node.id ? 3 : 2}
-                        shadowBlur={20}
-                        shadowColor={node.color}
-                        opacity={selectedNode === node.id ? 1 : 0.8}
-                        onClick={() => handleNodeSelection(node.id)}
-                      />
-                      <Text
-                        text={node.name}
-                        fontSize={14}
-                        fill={node.color}
-                        fontFamily="Cardo"
-                        align="center"
-                        offsetX={node.name.length * 3.5}
-                        y={-7}
-                      />
-                    </Group>
-                  ))}
-                  
-                  {/* Sigils in the Nexus */}
-                  {sigilPositions.map((position) => (
-                    <SigilNode
-                      key={position.sigil.id}
-                      position={position}
-                      onDrop={handleSigilDrop}
-                      onClick={() => handleSigilClick(position.sigil)}
-                      isSelected={selectedSigil?.id === position.sigil.id}
-                    />
-                  ))}
-                  
-                  {/* User Node - Shows the user's position in the quantum field */}
-                  <Circle
-                    x={compassSize.width / 2}
-                    y={compassSize.height / 2}
-                    radius={15}
-                    fill={`${chakraState.color}80`}
-                    shadowColor={chakraState.color}
-                    shadowBlur={20}
-                    shadowOpacity={0.8}
+              {showGridMap ? (
+                <div className="w-full h-[600px] flex items-center justify-center">
+                  <SymbolCanvas 
+                    chakraColor={chakraState.color}
+                    animated={true}
+                    width={compassSize.width}
+                    height={compassSize.height}
+                    intensity={0.7}
+                    geometryType="flower-of-life"
                   />
-                </Layer>
-              </Stage>
+                  
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div 
+                      className="px-4 py-2 rounded-lg"
+                      style={{ 
+                        backgroundColor: `${chakraState.color}20`,
+                        color: chakraState.color,
+                        boxShadow: `0 0 20px ${chakraState.color}40`
+                      }}
+                    >
+                      <div className="text-center mb-2">Intention: "{intention}"</div>
+                      <div className="flex items-center justify-center space-x-4">
+                        <div className="text-center">
+                          <div className="text-lg font-medium">Level {level}</div>
+                          <div className="text-sm opacity-70">User</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-medium">{chakraState.frequency} Hz</div>
+                          <div className="text-sm opacity-70">Frequency</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-medium">{sigils.length}</div>
+                          <div className="text-sm opacity-70">Sigils</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Stage 
+                  width={compassSize.width} 
+                  height={compassSize.height}
+                  ref={stageRef}
+                  style={{ backgroundColor: '#1a1a2e' }}
+                >
+                  <Layer>
+                    {/* Background sacred geometry */}
+                    {renderBackground()}
+                    
+                    {/* Timeline Nodes */}
+                    {timelineNodes.map((node) => (
+                      <Group key={node.id} x={node.x} y={node.y}>
+                        <Circle
+                          radius={60}
+                          fill={`${node.color}20`}
+                          stroke={node.color}
+                          strokeWidth={selectedNode === node.id ? 3 : 2}
+                          shadowBlur={20}
+                          shadowColor={node.color}
+                          opacity={selectedNode === node.id ? 1 : 0.8}
+                          onClick={() => handleNodeSelection(node.id)}
+                        />
+                        <Text
+                          text={node.name}
+                          fontSize={14}
+                          fill={node.color}
+                          fontFamily="Cardo"
+                          align="center"
+                          offsetX={node.name.length * 3.5}
+                          y={-7}
+                        />
+                      </Group>
+                    ))}
+                    
+                    {/* Sigils in the Nexus */}
+                    {sigilPositions.map((position) => (
+                      <SigilNode
+                        key={position.sigil.id}
+                        position={position}
+                        onDrop={handleSigilDrop}
+                        onClick={() => handleSigilClick(position.sigil)}
+                        isSelected={selectedSigil?.id === position.sigil.id}
+                      />
+                    ))}
+                    
+                    {/* User Node - Shows the user's position in the quantum field */}
+                    <Circle
+                      x={compassSize.width / 2}
+                      y={compassSize.height / 2}
+                      radius={15}
+                      fill={`${chakraState.color}80`}
+                      shadowColor={chakraState.color}
+                      shadowBlur={20}
+                      shadowOpacity={0.8}
+                    />
+                  </Layer>
+                </Stage>
+              )}
               
               {/* Overlay Information */}
               {selectedNode && (
@@ -766,6 +877,43 @@ const EchoCompassPage: React.FC = () => {
               </div>
             </motion.div>
           )}
+          
+          {/* Quantum Field Status */}
+          <motion.div
+            className="mt-4 bg-dark-200 p-4 rounded-2xl border border-dark-300 shadow-chakra-glow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <div className="flex flex-wrap gap-4">
+              <div 
+                className="flex-1 p-3 rounded-lg"
+                style={{ 
+                  backgroundColor: `${chakraState.color}15`,
+                  border: `1px solid ${chakraState.color}30`
+                }}
+              >
+                <div className="text-sm text-gray-400 mb-1">Quantum Frequency</div>
+                <div className="font-medium" style={{ color: chakraState.color }}>{chakraState.frequency} Hz</div>
+              </div>
+              
+              <div 
+                className="flex-1 p-3 rounded-lg bg-dark-300"
+              >
+                <div className="text-sm text-gray-400 mb-1">Sigil Alignments</div>
+                <div className="font-medium text-white">
+                  {sigilPositions.filter(pos => pos.timelineNodeId).length} / {sigilPositions.length}
+                </div>
+              </div>
+              
+              <div 
+                className="flex-1 p-3 rounded-lg bg-dark-300"
+              >
+                <div className="text-sm text-gray-400 mb-1">Field Resonance</div>
+                <div className="font-medium text-white">{resonanceLevel}%</div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
       
