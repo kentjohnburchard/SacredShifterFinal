@@ -20,9 +20,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user for development
+// Mock user for development - using valid UUID format
 const mockUser: UserProfile = {
-  id: 'dev-user-123',
+  id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
   full_name: 'Dev User',
   display_name: 'Dev',
   avatar_url: null,
@@ -36,7 +36,7 @@ const mockUser: UserProfile = {
 
 const mockSession = {
   user: {
-    id: 'dev-user-123',
+    id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
     email: 'dev@example.com'
   }
 };
