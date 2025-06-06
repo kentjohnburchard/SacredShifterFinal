@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Aperture, Calendar, Feather, Star, Users, BarChart2, Layout, Compass, Book, Wand2, Moon, BookOpen } from 'lucide-react';
+import { Home, Aperture, Calendar, Feather, Star, Users, BarChart2, Layout, Compass, Book, Wand2, Moon, BookOpen, Navigation } from 'lucide-react';
 import { useChakra } from '../../context/ChakraContext';
 import { motion } from 'framer-motion';
 
@@ -89,22 +89,23 @@ const Sidebar: React.FC = () => {
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
             <NavItem icon={<Home size={20} />} to="/dashboard" label="Dashboard" isActive={isActive('/dashboard')} index={0} />
-            <NavItem icon={<Aperture size={20} />} to="/sigils" label="Soul Sigils" isActive={isActive('/sigils')} index={1} />
-            <NavItem icon={<Layout size={20} />} to="/sigil-gallery" label="Sigil Gallery" isActive={isActive('/sigil-gallery')} index={2} />
-            <NavItem icon={<Compass size={20} />} to="/sigil-evolution" label="Sigil Evolution" isActive={isActive('/sigil-evolution')} index={3} />
-            <NavItem icon={<Layout size={20} />} to="/sigil-board" label="Sigil Board" isActive={isActive('/sigil-board')} index={4} />
-            <NavItem icon={<Calendar size={20} />} to="/tasks" label="Sacred Tasks" isActive={isActive('/tasks')} index={5} />
-            <NavItem icon={<Feather size={20} />} to="/fractal-mirror" label="Fractal Mirror" isActive={isActive('/fractal-mirror')} index={6} />
-            <NavItem icon={<Star size={20} />} to="/digital-baptism" label="Digital Baptism" isActive={isActive('/digital-baptism')} index={7} />
-            <NavItem icon={<Book size={20} />} to="/the-fool" label="The Fool" isActive={isActive('/the-fool')} index={8} />
-            <NavItem icon={<Moon size={20} />} to="/the-high-priestess" label="High Priestess" isActive={isActive('/the-high-priestess')} index={9} />
-            <NavItem icon={<BookOpen size={20} />} to="/journeys/hierophant" label="The Hierophant" isActive={isActive('/journeys/hierophant')} index={10} />
-            <NavItem icon={<Wand2 size={20} />} to="/the-magician" label="The Magician" isActive={isActive('/the-magician')} index={11} />
-            <NavItem icon={<Book size={20} />} to="/the-empress" label="The Empress" isActive={isActive('/the-empress')} index={12} />
-            <NavItem icon={<Users size={20} />} to="/sacred-circle" label="Sacred Circle" isActive={location.pathname.startsWith('/sacred-circle')} index={13} />
-            <NavItem icon={<BarChart2 size={20} />} to="/blueprint" label="Soul Blueprint" isActive={isActive('/blueprint')} index={14} />
-            <NavItem icon={<Compass size={20} />} to="/grid-map" label="Grid Echo Map" isActive={isActive('/grid-map')} index={15} />
-            <NavItem icon={<Wand2 size={20} />} to="/timeline-selector" label="Timeline Selector" isActive={isActive('/timeline-selector')} index={16} />
+            <NavItem icon={<Navigation size={20} />} to="/echo-compass" label="Echo Compass" isActive={isActive('/echo-compass')} index={1} />
+            <NavItem icon={<Aperture size={20} />} to="/sigils" label="Soul Sigils" isActive={isActive('/sigils')} index={2} />
+            <NavItem icon={<Layout size={20} />} to="/sigil-gallery" label="Sigil Gallery" isActive={isActive('/sigil-gallery')} index={3} />
+            <NavItem icon={<Compass size={20} />} to="/sigil-evolution" label="Sigil Evolution" isActive={isActive('/sigil-evolution')} index={4} />
+            <NavItem icon={<Layout size={20} />} to="/sigil-board" label="Sigil Board" isActive={isActive('/sigil-board')} index={5} />
+            <NavItem icon={<Calendar size={20} />} to="/tasks" label="Sacred Tasks" isActive={isActive('/tasks')} index={6} />
+            <NavItem icon={<Feather size={20} />} to="/fractal-mirror" label="Fractal Mirror" isActive={isActive('/fractal-mirror')} index={7} />
+            <NavItem icon={<Star size={20} />} to="/digital-baptism" label="Digital Baptism" isActive={isActive('/digital-baptism')} index={8} />
+            <NavItem icon={<Book size={20} />} to="/the-fool" label="The Fool" isActive={isActive('/the-fool')} index={9} />
+            <NavItem icon={<Moon size={20} />} to="/the-high-priestess" label="High Priestess" isActive={isActive('/the-high-priestess')} index={10} />
+            <NavItem icon={<BookOpen size={20} />} to="/journeys/hierophant" label="The Hierophant" isActive={isActive('/journeys/hierophant')} index={11} />
+            <NavItem icon={<Wand2 size={20} />} to="/the-magician" label="The Magician" isActive={isActive('/the-magician')} index={12} />
+            <NavItem icon={<Book size={20} />} to="/the-empress" label="The Empress" isActive={isActive('/the-empress')} index={13} />
+            <NavItem icon={<Users size={20} />} to="/sacred-circle" label="Sacred Circle" isActive={location.pathname.startsWith('/sacred-circle')} index={14} />
+            <NavItem icon={<BarChart2 size={20} />} to="/blueprint" label="Soul Blueprint" isActive={isActive('/blueprint')} index={15} />
+            <NavItem icon={<Compass size={20} />} to="/grid-map" label="Grid Echo Map" isActive={isActive('/grid-map')} index={16} />
+            <NavItem icon={<Wand2 size={20} />} to="/timeline-selector" label="Timeline Selector" isActive={isActive('/timeline-selector')} index={17} />
 
           </motion.div>
         </div>
