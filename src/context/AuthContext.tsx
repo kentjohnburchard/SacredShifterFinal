@@ -20,223 +20,80 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock user for development
+const mockUser: UserProfile = {
+  id: 'dev-user-123',
+  full_name: 'Dev User',
+  display_name: 'Dev',
+  avatar_url: null,
+  onboarding_completed: true,
+  light_points: 150,
+  light_level: 2,
+  ascension_title: 'Lightbearer',
+  chakra_highlight: 'Heart',
+  subscription_tier: 'free'
+};
+
+const mockSession = {
+  user: {
+    id: 'dev-user-123',
+    email: 'dev@example.com'
+  }
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // For development, start with mock user and no loading
+  const [user, setUser] = useState<UserProfile | null>(mockUser);
+  const [session, setSession] = useState<any>(mockSession);
+  const [isLoading, setIsLoading] = useState(false); // No loading in dev mode
   const [authError, setAuthError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        console.log('[Auth] Starting initialization...');
-        const { data } = await supabase.auth.getSession();
-        console.log('getSession() returned:', data);
-        
-        const currentSession = data?.session;
-        setSession(currentSession);
-
-        if (currentSession?.user) {
-          console.log('[Auth] Session found, fetching profile...');
-          await fetchUserProfile(currentSession.user.id);
-        } else {
-          console.log('[Auth] No session found');
-          setUser(null);
-        }
-        
-        console.log('useEffect complete', currentSession);
-      } catch (err) {
-        console.error('[Auth] Init error:', err);
-        setAuthError(err instanceof Error ? err : new Error(String(err)));
-        setUser(null);
-      } finally {
-        console.log('[Auth] Setting isLoading to false');
-        setIsLoading(false);
-      }
-    };
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('[Auth] State changed:', event, 'Session:', !!newSession);
-        
-        setSession(newSession);
-        
-        // Only show loading for significant auth changes, not initial states
-        if (event !== 'INITIAL_SESSION') {
-          setIsLoading(true);
-        }
-
-        try {
-          if (newSession?.user) {
-            console.log('[Auth] New session, fetching profile...');
-            await fetchUserProfile(newSession.user.id);
-          } else {
-            console.log('[Auth] No session, clearing user');
-            setUser(null);
-          }
-        } catch (err) {
-          console.error('[Auth] Auth state change error:', err);
-          setAuthError(err instanceof Error ? err : new Error(String(err)));
-          setUser(null);
-        } finally {
-          // Always ensure loading is turned off
-          if (event !== 'INITIAL_SESSION') {
-            console.log('[Auth] Auth state change complete, setting isLoading to false');
-            setIsLoading(false);
-          }
-        }
-      }
-    );
-
-    init();
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    // In dev mode, just set the mock user immediately
+    console.log('[Auth] DEV MODE: Using mock user');
+    setUser(mockUser);
+    setSession(mockSession);
+    setIsLoading(false);
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    console.log('[Auth] Fetching profile for:', userId);
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      console.log('fetchUserProfile() returned data:', data, 'error:', error);
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          console.warn('[Auth] Profile not found, creating new one...');
-          const { data: authUserData } = await supabase.auth.getUser();
-          const authUser = authUserData?.user;
-          if (!authUser) throw new Error('No authenticated user');
-
-          const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: userId,
-                email: authUser.email,
-                full_name: authUser.user_metadata?.full_name ?? null,
-                display_name: authUser.user_metadata?.display_name ?? null,
-                light_points: 0,
-                light_level: 0,
-                ascension_title: 'Seeker',
-                onboarding_completed: false,
-              },
-            ])
-            .select()
-            .single();
-
-          if (insertError) throw insertError;
-          console.log('[Auth] Created profile:', newProfile);
-          setUser(newProfile);
-        } else {
-          console.error('[Auth] Profile fetch error:', error);
-          throw error;
-        }
-      } else if (data && typeof data === 'object' && data.id) {
-        console.log('[Auth] Profile loaded:', data);
-        setUser(data);
-      } else {
-        console.warn('[Auth] Malformed profile data:', data);
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('[Auth] fetchUserProfile error:', error);
-      throw error; // Re-throw to be handled by caller
-    }
+    // In dev mode, just return the mock user
+    console.log('[Auth] DEV MODE: fetchUserProfile called, returning mock user');
+    return mockUser;
   };
 
   const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        console.error('[Auth] Sign-in error:', error);
-      } else {
-        console.log('[Auth] Sign-in success:', data.user?.id);
-      }
-      return { error };
-    } finally {
-      // Don't set loading to false here - let the auth state listener handle it
-    }
+    // In dev mode, always succeed
+    console.log('[Auth] DEV MODE: Mock sign-in');
+    setUser(mockUser);
+    setSession(mockSession);
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            display_name: fullName.split(' ')[0],
-          },
-        },
-      });
-
-      if (error) {
-        console.error('[Auth] Sign-up error:', error);
-      } else if (data?.user) {
-        const { data: newProfile, error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              email,
-              full_name: data.user.user_metadata?.full_name ?? fullName,
-              display_name: data.user.user_metadata?.display_name ?? fullName.split(' ')[0],
-              light_points: 0,
-              light_level: 0,
-              ascension_title: 'Seeker',
-              onboarding_completed: false,
-            },
-          ])
-          .select()
-          .single();
-
-        if (profileError) {
-          console.error('[Auth] Profile creation error:', profileError);
-        } else {
-          setUser(newProfile);
-        }
-      }
-
-      return { error };
-    } finally {
-      // Don't set loading to false here - let the auth state listener handle it
-    }
+    // In dev mode, always succeed
+    console.log('[Auth] DEV MODE: Mock sign-up');
+    setUser(mockUser);
+    setSession(mockSession);
+    return { error: null };
   };
 
   const signOut = async () => {
-    try {
-      setIsLoading(true);
-      await supabase.auth.signOut();
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+    // In dev mode, just clear the user but keep mock for easy re-login
+    console.log('[Auth] DEV MODE: Mock sign-out');
+    setUser(null);
+    setSession(null);
+    // Immediately set mock user back for dev convenience
+    setTimeout(() => {
+      setUser(mockUser);
+      setSession(mockSession);
+    }, 100);
   };
 
   const refreshProfile = async () => {
-    if (session?.user) {
-      try {
-        setIsLoading(true);
-        await fetchUserProfile(session.user.id);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    // In dev mode, do nothing
+    console.log('[Auth] DEV MODE: Mock refresh profile');
   };
-
-  if (authError) {
-    console.error('[Auth] Global auth error:', authError);
-  }
 
   return (
     <AuthContext.Provider
