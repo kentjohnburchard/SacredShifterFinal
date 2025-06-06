@@ -1,0 +1,461 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --chakra-root: #C62828;
+  --chakra-sacral: #EF6C00;
+  --chakra-solarplexus: #FDD835;
+  --chakra-heart: #66BB6A;
+  --chakra-throat: #42A5F5;
+  --chakra-thirdeye: #7E57C2;
+  --chakra-crown: #AB47BC;
+  --chakra-color: var(--chakra-heart);
+  --chakra-frequency: 639;
+  --chakra-intensity: 0.5;
+  --chakra-glow-color: rgba(102, 187, 106, 0.3);
+  
+  /* Fractal parameters */
+  --phi: 1.618033988749895; /* Golden ratio */
+  --tesla-3: 3;
+  --tesla-6: 6;
+  --tesla-9: 9;
+  
+  /* Mystical aesthetics */
+  --void-gradient: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+  --ethereal-gradient: linear-gradient(135deg, #9d4edd 0%, #7209b7 50%, #560bad 100%);
+  --glass-backdrop: rgba(255, 255, 255, 0.05);
+  --rune-border: rgba(255, 255, 255, 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--void-gradient);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cardo', serif;
+  letter-spacing: 0.025em;
+}
+
+.font-mystical {
+  font-family: 'Eczar', serif;
+}
+
+.font-sacred {
+  font-family: 'Cardo', serif;
+}
+
+/* Chakra-specific theme classes */
+body.chakra-root { 
+  --chakra-color: var(--chakra-root);
+  --chakra-glow-color: rgba(198, 40, 40, 0.3);
+  --chakra-accent-light: rgba(198, 40, 40, 0.1);
+  --chakra-accent-medium: rgba(198, 40, 40, 0.3);
+  --chakra-accent-strong: rgba(198, 40, 40, 0.8);
+}
+
+body.chakra-sacral {
+  --chakra-color: var(--chakra-sacral);
+  --chakra-glow-color: rgba(239, 108, 0, 0.3);
+  --chakra-accent-light: rgba(239, 108, 0, 0.1);
+  --chakra-accent-medium: rgba(239, 108, 0, 0.3);
+  --chakra-accent-strong: rgba(239, 108, 0, 0.8);
+}
+
+body.chakra-solar-plexus {
+  --chakra-color: var(--chakra-solarplexus);
+  --chakra-glow-color: rgba(253, 216, 53, 0.3);
+  --chakra-accent-light: rgba(253, 216, 53, 0.1);
+  --chakra-accent-medium: rgba(253, 216, 53, 0.3);
+  --chakra-accent-strong: rgba(253, 216, 53, 0.8);
+}
+
+body.chakra-heart {
+  --chakra-color: var(--chakra-heart);
+  --chakra-glow-color: rgba(102, 187, 106, 0.3);
+  --chakra-accent-light: rgba(102, 187, 106, 0.1);
+  --chakra-accent-medium: rgba(102, 187, 106, 0.3);
+  --chakra-accent-strong: rgba(102, 187, 106, 0.8);
+}
+
+body.chakra-throat {
+  --chakra-color: var(--chakra-throat);
+  --chakra-glow-color: rgba(66, 165, 245, 0.3);
+  --chakra-accent-light: rgba(66, 165, 245, 0.1);
+  --chakra-accent-medium: rgba(66, 165, 245, 0.3);
+  --chakra-accent-strong: rgba(66, 165, 245, 0.8);
+}
+
+body.chakra-third-eye {
+  --chakra-color: var(--chakra-thirdeye);
+  --chakra-glow-color: rgba(126, 87, 194, 0.3);
+  --chakra-accent-light: rgba(126, 87, 194, 0.1);
+  --chakra-accent-medium: rgba(126, 87, 194, 0.3);
+  --chakra-accent-strong: rgba(126, 87, 194, 0.8);
+}
+
+body.chakra-crown {
+  --chakra-color: var(--chakra-crown);
+  --chakra-glow-color: rgba(171, 71, 188, 0.3);
+  --chakra-accent-light: rgba(171, 71, 188, 0.1);
+  --chakra-accent-medium: rgba(171, 71, 188, 0.3);
+  --chakra-accent-strong: rgba(171, 71, 188, 0.8);
+}
+
+.dark .bg-white {
+  @apply bg-appDark-200 text-gray-100 border-appDark-300;
+}
+
+.dark .text-gray-900 {
+  @apply text-gray-100;
+}
+
+.dark .text-gray-800 {
+  @apply text-gray-200;
+}
+
+.dark .text-gray-700 {
+  @apply text-gray-300;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-400;
+}
+
+.dark .text-gray-500 {
+  color: rgba(156, 163, 175, var(--tw-text-opacity, 1));
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  @apply border-appDark-400;
+}
+
+.dark .bg-gray-50, 
+.dark .bg-gray-100, 
+.dark .hover\:bg-gray-50:hover, 
+.dark .hover\:bg-gray-100:hover {
+  @apply bg-appDark-300 text-gray-300;
+}
+
+.dark .shadow-md, 
+.dark .shadow-sm, 
+.dark .shadow-lg {
+  @apply shadow-mystical;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-mystical {
+  background: rgba(157, 78, 221, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(157, 78, 221, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(157, 78, 221, 0.3);
+}
+
+/* Etched ink-line borders and sacred iconography */
+.rune-border {
+  border: 1px solid var(--rune-border);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 
+              0 0 20px rgba(157, 78, 221, 0.2);
+  position: relative;
+}
+
+.rune-border::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.sacred-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.5), transparent);
+  position: relative;
+}
+
+.sacred-divider::before {
+  content: '⟐';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--mystical-void);
+  padding: 0 0.5rem;
+  color: rgba(157, 78, 221, 0.7);
+  font-size: 0.75rem;
+}
+
+/* Sacred heading styles */
+.sacred-heading {
+  @apply font-heading font-semibold tracking-wider;
+  position: relative;
+  display: inline-block;
+}
+
+.sacred-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--chakra-color), transparent);
+  opacity: 0.6;
+}
+
+/* Enhanced button styles with mystical aesthetics */
+.tattoo-btn {
+  @apply rounded-2xl transition-all duration-300 transform border border-transparent;
+  @apply dark:bg-appDark-200 dark:text-white;
+  position: relative;
+  overflow: hidden;
+}
+
+.tattoo-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.tattoo-btn:hover::before {
+  left: 100%;
+}
+
+.tattoo-btn-primary {
+  @apply tattoo-btn;
+  box-shadow: 0 0 20px var(--chakra-glow-color), 
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.tattoo-btn-primary:hover {
+  box-shadow: 0 0 30px var(--chakra-glow-color), 
+              inset 0 0 30px rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.tattoo-btn-outline {
+  @apply tattoo-btn bg-transparent border glass;
+  border-color: var(--chakra-color);
+}
+
+/* Enhanced card styles */
+.tattoo-card {
+  @apply rounded-2xl overflow-hidden transition-all duration-300;
+  @apply dark:bg-appDark-200 dark:border-appDark-300 dark:text-gray-100;
+  position: relative;
+}
+
+.tattoo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" stroke="%23ffffff" stroke-opacity="0.02" stroke-width="0.5"%3E%3Cpath d="M10,10 L30,10 L20,30 Z"/%3E%3Ccircle cx="80" cy="80" r="8"/%3E%3C/g%3E%3C/svg%3E');
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fractal-card {
+  @apply tattoo-card glass-mystical;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.fractal-card:hover {
+  transform: rotateY(5deg) rotateX(5deg);
+  box-shadow: 0 20px 40px rgba(157, 78, 221, 0.3);
+}
+
+/* Form elements with mystical theming */
+input:focus, textarea:focus, select:focus {
+  border-color: var(--chakra-color);
+  box-shadow: 0 0 0 3px var(--chakra-accent-light), 
+              0 0 20px var(--chakra-glow-color);
+  transition: all 0.3s cubic-bezier(0.3, 0, 0.6, 1);
+}
+
+/* Custom scrollbar with mystical aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 10, 26, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(157, 78, 221, 0.6), rgba(86, 11, 173, 0.6));
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(157, 78, 221, 0.8), rgba(86, 11, 173, 0.8));
+}
+
+/* Sacred number utilities */
+.tesla-timing {
+  transition-duration: 300ms; /* 3 * 100 */
+  animation-duration: 3s;
+}
+
+.tesla-timing-6 {
+  transition-duration: 600ms; /* 6 * 100 */
+  animation-duration: 6s;
+}
+
+.tesla-timing-9 {
+  transition-duration: 900ms; /* 9 * 100 */
+  animation-duration: 9s;
+}
+
+/* Floating math formulas */
+.floating-formula {
+  position: absolute;
+  font-family: 'Cardo', serif;
+  font-style: italic;
+  opacity: 0.1;
+  font-size: 0.875rem;
+  color: rgba(157, 78, 221, 0.3);
+  pointer-events: none;
+  animation: etherealDrift 15s ease-in-out infinite;
+}
+
+/* Sacred glow utilities with enhanced mystical aesthetics */
+.shadow-chakra-glow {
+  box-shadow: 0 0 30px var(--chakra-glow-color),
+              0 0 60px var(--chakra-glow-color),
+              inset 0 0 30px rgba(255, 255, 255, 0.05);
+}
+
+.shadow-inner-glow {
+  box-shadow: inset 0 0 30px var(--chakra-glow-color);
+}
+
+.shadow-mystical {
+  box-shadow: 0 8px 32px rgba(157, 78, 221, 0.3),
+              0 0 40px rgba(157, 78, 221, 0.1);
+}
+
+/* Three, Six, Nine energy field (Tesla's key numbers) enhanced */
+.tesla-field {
+  position: relative;
+}
+
+.tesla-field::before, 
+.tesla-field::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.tesla-field::before {
+  box-shadow: 0 0 3px var(--chakra-color), 0 0 6px var(--chakra-color);
+  animation: teslaField 9s infinite;
+}
+
+.tesla-field::after {
+  box-shadow: 0 0 9px var(--chakra-color), 0 0 18px var(--chakra-color);
+  animation: teslaField 3s infinite alternate;
+}
+
+/* Enhanced Vitruvian proportions with mystical touches */
+.vitruvian-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.vitruvian-circle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid var(--chakra-color);
+  box-shadow: 0 0 20px var(--chakra-glow-color);
+}
+
+.vitruvian-square {
+  position: absolute;
+  width: 63.6%; /* Divine proportion */
+  height: 63.6%;
+  top: 18.2%;
+  left: 18.2%;
+  border: 1px solid var(--chakra-color);
+  box-shadow: inset 0 0 20px var(--chakra-glow-color);
+}
+
+/* Mystical background patterns */
+.mystical-background {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(157, 78, 221, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(86, 11, 173, 0.1) 0%, transparent 50%),
+    url('data:image/svg+xml,%3Csvg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" stroke="%23ffffff" stroke-opacity="0.02" stroke-width="0.5"%3E%3Cpath d="M20,20 L60,20 L40,60 Z"/%3E%3Cpath d="M140,140 L180,140 L160,180 Z"/%3E%3Ccircle cx="50" cy="150" r="15"/%3E%3Ccircle cx="150" cy="50" r="15"/%3E%3Cpath d="M100,30 L130,60 L100,90 L70,60 Z"/%3E%3C/g%3E%3C/svg%3E');
+  background-size: 100% 100%, 100% 100%, 200px 200px;
+}
+
+/* Fractal breathing animations */
+.mystic-breathe {
+  animation: mysticBreathe 4s ease-in-out infinite;
+}
+
+/* Glyph watermarks */
+.glyph-watermark {
+  position: relative;
+}
+
+.glyph-watermark::before {
+  content: '⟐';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  font-size: 4rem;
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+  color: var(--chakra-color);
+}
