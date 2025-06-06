@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sigil Compiler Schema",
+  "description": "Schema for compiling personalized sigils in SacredShifter369.0",
+  "type": "object",
+  "required": [
+    "user_id",
+    "sigil_name",
+    "archetype",
+    "emotion_state",
+    "frequency_band",
+    "geometry_type",
+    "pattern_strength",
+    "svg_data",
+    "broadcast_enabled"
+  ],
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the user who created the sigil."
+    },
+    "sigil_name": {
+      "type": "string",
+      "description": "A user-defined name or intention for the sigil.",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "archetype": {
+      "type": "string",
+      "description": "The tarot or spiritual archetype associated with the sigil.",
+      "enum": [
+        "Magician", "High Priestess", "Empress", "Hierophant", "Fool", "Chariot", "Strength", "Hermit",
+        "Wheel of Fortune", "Justice", "Hanged Man", "Death", "Temperance", "Devil", "Tower",
+        "Star", "Moon", "Sun", "Judgment", "World"
+      ]
+    },
+    "emotion_state": {
+      "type": "string",
+      "description": "The emotional energy encoded in the sigil.",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "frequency_band": {
+      "type": "number",
+      "description": "Solfeggio or other resonance frequency linked to the sigil.",
+      "enum": [174, 285, 396, 417, 528, 639, 741, 852, 963]
+    },
+    "geometry_type": {
+      "type": "string",
+      "description": "The sacred geometry pattern used in the sigil.",
+      "enum": [
+        "spiral", "hex", "flower", "metatron", "vesica", "triangle",
+        "circle", "merkaba", "seed_of_life", "flower_of_life"
+      ]
+    },
+    "pattern_strength": {
+      "type": "integer",
+      "description": "The intensity or complexity of the pattern (1-10).",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "svg_data": {
+      "type": "string",
+      "description": "The inline SVG or path data of the sigil.",
+      "minLength": 10
+    },
+    "broadcast_enabled": {
+      "type": "boolean",
+      "description": "True if the sigil is intended to be projected into the shared field."
+    }
+  },
+  "example": {
+    "user_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+    "sigil_name": "Abundance Flow",
+    "archetype": "Empress",
+    "emotion_state": "Joyful Expansion",
+    "frequency_band": 528,
+    "geometry_type": "flower",
+    "pattern_strength": 8,
+    "svg_data": "<svg><path d='M...' /></svg>",
+    "broadcast_enabled": true
+  }
+}

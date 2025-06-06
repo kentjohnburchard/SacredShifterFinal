@@ -12,7 +12,7 @@ import MysticalHeading from '../components/ui/MysticalHeading';
 import { Aperture, Eye, Calendar } from 'lucide-react';
 
 interface WisdomSnippet {
-  content: string;
+  text: string;
   source: string;
 }
 
@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('wisdom_snippets')
-          .select('content, source')
+          .select('text, source')
           .limit(10);
           
         if (error) throw error;
@@ -248,7 +248,7 @@ const HomePage: React.FC = () => {
             >
               <FractalCard 
                 className="p-8 h-full"
-                animatedGlyph={<AnimatedGlyph type="sigil\" size={32} color={chakraState.color} animation="pulse" />}
+                animatedGlyph={<AnimatedGlyph type="sigil" size={32} color={chakraState.color} animation="pulse" />}
                 chakraGlow={true}
               >
                 <div className="text-center">
@@ -271,7 +271,7 @@ const HomePage: React.FC = () => {
             >
               <FractalCard 
                 className="p-8 h-full"
-                animatedGlyph={<AnimatedGlyph type="spiral\" size={32} color={chakraState.color} animation="rotate" />}
+                animatedGlyph={<AnimatedGlyph type="spiral" size={32} color={chakraState.color} animation="rotate" />}
                 chakraGlow={true}
               >
                 <div className="text-center">
@@ -294,7 +294,7 @@ const HomePage: React.FC = () => {
             >
               <FractalCard 
                 className="p-8 h-full"
-                animatedGlyph={<AnimatedGlyph type="circle\" size={32} color={chakraState.color} animation="breathe" />}
+                animatedGlyph={<AnimatedGlyph type="circle" size={32} color={chakraState.color} animation="breathe" />}
                 chakraGlow={true}
               >
                 <div className="text-center">
@@ -312,88 +312,98 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Section 3: Sacred Invitation */}
-      <div className="relative py-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
-            viewport={{ once: true }}
-            className="glass-mystical rounded-3xl p-12 relative overflow-hidden"
+{/* Section 3: Sacred Invitation */}
+<div className="relative py-24 px-4">
+  <div className="max-w-4xl mx-auto text-center">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1 }}
+      viewport={{ once: true }}
+      className="glass-mystical rounded-3xl p-12 relative overflow-hidden"
+    >
+      {/* Rotating wisdom quote */}
+      {!quotesLoading && currentQuote ? (
+        <motion.div
+          key={currentQuote.text}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 1 }}
+          className="mb-8"
+        >
+          <blockquote
+            className="text-2xl md:text-3xl font-sacred italic text-gray-200 mb-4"
+            style={{
+              textShadow: `0 0 8px ${chakraState.color}66`,
+            }}
           >
-            {/* Rotating wisdom quote */}
-            {!quotesLoading && currentQuote && (
-              <motion.div
-                key={currentQuote.content}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 1 }}
-                className="mb-8"
-              >
-                <blockquote className="text-2xl md:text-3xl font-sacred italic text-gray-200 mb-4">
-                  "{currentQuote.content}"
-                </blockquote>
-                <cite className="text-lg text-gray-400">— {currentQuote.source}</cite>
-              </motion.div>
-            )}
-            
-            {/* Scroll-triggered animations */}
-            <motion.div
-              className="flex justify-center space-x-8 mt-12"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <motion.div
-                animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{ 
-                  rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 3, repeat: Infinity }
-                }}
-              >
-                <AnimatedGlyph type="merkaba" size={60} color={chakraState.color} animation="none" />
-              </motion.div>
-              
-              <motion.div
-                animate={{ 
-                  y: [0, -10, 0],
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
-                <AnimatedGlyph type="vesica" size={50} color={`${chakraState.color}cc`} animation="none" />
-              </motion.div>
-              
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{ 
-                  duration: 6, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <AnimatedGlyph type="triangle" size={55} color={`${chakraState.color}aa`} animation="none" />
-              </motion.div>
-            </motion.div>
-            
-            {/* Background pattern overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <div className="w-full h-full" style={{
-                backgroundImage: `radial-gradient(circle at 50% 50%, ${chakraState.color}20, transparent 70%)`
-              }} />
-            </div>
-          </motion.div>
-        </div>
+            "{currentQuote.text}"
+          </blockquote>
+          <cite className="text-lg text-gray-400">— {currentQuote.source}</cite>
+        </motion.div>
+      ) : !quotesLoading && (
+        <p className="text-gray-400 italic text-xl font-sacred">
+          The silence between breaths holds its own wisdom.
+        </p>
+      )}
+
+      {/* Scroll-triggered animations */}
+      <motion.div
+        className="flex justify-center space-x-8 mt-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5 }}
+        viewport={{ once: true }}
+      >
+        <motion.div
+          animate={{
+            rotate: 360,
+            scale: [1, 1.1, 1]
+          }}
+          transition={{
+            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+            scale: { duration: 3, repeat: Infinity }
+          }}
+        >
+          <AnimatedGlyph type="merkaba" size={60} color={chakraState.color} animation="none" />
+        </motion.div>
+
+        <motion.div
+          animate={{
+            y: [0, -10, 0],
+            opacity: [0.7, 1, 0.7]
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          <AnimatedGlyph type="vesica" size={50} color={`${chakraState.color}cc`} animation="none" />
+        </motion.div>
+
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <AnimatedGlyph type="triangle" size={55} color={`${chakraState.color}aa`} animation="none" />
+        </motion.div>
+      </motion.div>
+
+      {/* Background pattern overlay */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="w-full h-full" style={{
+          backgroundImage: `radial-gradient(circle at 50% 50%, ${chakraState.color}20, transparent 70%)`
+        }} />
       </div>
+    </motion.div>
+  </div>
+</div>
+
     </div>
   );
 };

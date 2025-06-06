@@ -24,6 +24,8 @@ import ProfilePage from './pages/ProfilePage';
 import SacredCirclePage from './pages/SacredCirclePage';
 import CircleDetailPage from './pages/CircleDetailPage';
 import ResonanceSessionPage from './pages/ResonanceSessionPage';
+import GridEchoMap from './pages/GridEchoMap';
+import TimelineSelectorPage from './pages/TimelineSelectorPage';
 import Layout from './components/layout/Layout';
 import RequireAuth from './components/auth/RequireAuth';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -58,6 +60,8 @@ function App() {
                   <Route path="/sacred-circle" element={<RequireAuth><SacredCirclePage /></RequireAuth>} />
                   <Route path="/sacred-circle/:id" element={<RequireAuth><CircleDetailPage /></RequireAuth>} />
                   <Route path="/sacred-circle/:circleId/session/:sessionId" element={<RequireAuth><ResonanceSessionPage /></RequireAuth>} />
+                  <Route path="/grid-map" element={<RequireAuth><GridEchoMap /></RequireAuth>} />
+                  <Route path="/timeline-selector" element={<RequireAuth><TimelineSelectorPage /></RequireAuth>} />
                 </Route>
               </Routes>
             </XPProvider>

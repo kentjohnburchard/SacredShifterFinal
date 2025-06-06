@@ -78,15 +78,16 @@ const SigilPreview: React.FC<SigilPreviewProps> = ({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       whileHover={isInteractive ? { scale: 1.05 } : {}}
-      animate={{ 
-        boxShadow: [
-          `0 0 3px ${getChakraColor()}40`,
-          `0 0 6px ${getChakraColor()}40`,
-          `0 0 9px ${getChakraColor()}40`
-        ] 
-      }}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+animate={{ 
+  opacity: 1,
+  boxShadow: [
+    `0 0 3px ${getChakraColor()}40`,
+    `0 0 6px ${getChakraColor()}40`,
+    `0 0 9px ${getChakraColor()}40`
+  ] 
+}}
+
       transition={{ 
         duration: 0.5,
         boxShadow: { 
