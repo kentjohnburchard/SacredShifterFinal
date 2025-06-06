@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Aperture } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import SigilGenerator from '../components/sigils/SigilGenerator';
