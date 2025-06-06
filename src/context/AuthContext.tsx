@@ -30,12 +30,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const init = async () => {
       try {
         const { data } = await supabase.auth.getSession();
+        console.log('getSession() returned:', data);
+        
         const currentSession = data?.session;
         setSession(currentSession);
 
         if (currentSession?.user) {
           await fetchUserProfile(currentSession.user.id);
         }
+        
+        console.log('useEffect complete', currentSession);
       } catch (err) {
         setAuthError(err instanceof Error ? err : new Error(String(err)));
       } finally {
@@ -78,6 +82,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       .select('*')
       .eq('id', userId)
       .single();
+
+    console.log('fetchUserProfile() returned data:', data, 'error:', error);
 
     if (error) {
       if (error.code === 'PGRST116') {
