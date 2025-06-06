@@ -6,10 +6,12 @@ import { useXP } from '../context/XPProvider';
 import { supabase } from '../lib/supabase';
 import { ChakraType, Sigil } from '../types';
 import { motion } from 'framer-motion';
-import { Compass, Zap, Eye, Calendar, Plus } from 'lucide-react';
+import { Compass, Zap, Eye, Calendar, Plus, Info, Download, RefreshCw } from 'lucide-react';
 import useImage from 'use-image';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
+import AnimatedGlyph from '../components/ui/AnimatedGlyph';
+import FloatingFormulas from '../components/ui/FloatingFormulas';
 
 interface TimelineNode {
   id: string;
@@ -28,21 +30,35 @@ interface SigilPosition {
   scale: number;
   opacity: number;
   resonance: number;
+  timelineNodeId?: string;
+}
+
+interface SigilDetails {
+  id: string;
+  intention: string;
+  chakra: ChakraType;
+  frequency: number;
+  createdAt: string;
+  archetypeKey?: string;
 }
 
 const EchoCompassPage: React.FC = () => {
   const { user } = useAuth();
   const { chakraState, activateChakra } = useChakra();
-  const { addXP } = useXP();
+  const { addXP, level } = useXP();
   
   const stageRef = useRef<any>(null);
   const [sigils, setSigils] = useState<Sigil[]>([]);
   const [sigilPositions, setSigilPositions] = useState<SigilPosition[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [selectedSigil, setSelectedSigil] = useState<Sigil | null>(null);
   const [draggedSigil, setDraggedSigil] = useState<Sigil | null>(null);
+  const [showSigilDetails, setShowSigilDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [compassSize, setCompassSize] = useState({ width: 800, height: 600 });
   const [intention, setIntention] = useState('Navigate Sacred Timelines');
+  const [showEvolution, setShowEvolution] = useState(false);
+  const [evolutionHistory, setEvolutionHistory] = useState<Sigil[]>([]);
   
   // Timeline nodes with sacred geometry positioning
   const timelineNodes: TimelineNode[] = [
@@ -105,7 +121,7 @@ const EchoCompassPage: React.FC = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
         
       if (error) throw error;
       
@@ -113,15 +129,26 @@ const EchoCompassPage: React.FC = () => {
       
       // Initialize sigil positions in the nexus field
       if (data && data.length > 0) {
-        const positions = data.map((sigil, index) => ({
-          sigil,
-          x: 100 + (index * 80) % (compassSize.width - 200),
-          y: 100 + Math.floor(index / 8) * 100,
-          scale: 0.8 + Math.random() * 0.4,
-          opacity: 0.7 + Math.random() * 0.3,
-          resonance: Math.random()
-        }));
+        const positions = data.map((sigil, index) => {
+          // Create a golden ratio-based spiral placement
+          const phi = 1.618033988749895;
+          const angle = index * phi * Math.PI;
+          const radius = 50 + (index * 10);
+          
+          return {
+            sigil,
+            x: 400 + Math.cos(angle) * radius,
+            y: 300 + Math.sin(angle) * radius,
+            scale: 0.8 + Math.random() * 0.4,
+            opacity: 0.7 + Math.random() * 0.3,
+            resonance: Math.random()
+          };
+        });
         setSigilPositions(positions);
+        
+        if (selectedSigil === null) {
+          setSelectedSigil(data[0]);
+        }
       }
     } catch (error) {
       console.error('Error fetching sigils:', error);
@@ -135,10 +162,39 @@ const EchoCompassPage: React.FC = () => {
     if (node) {
       setSelectedNode(nodeId);
       activateChakra(node.chakra);
+      
+      // Find sigils associated with this node and highlight them
+      const relatedSigils = sigilPositions
+        .filter(pos => pos.timelineNodeId === nodeId)
+        .map(pos => pos.sigil);
+      
+      if (relatedSigils.length > 0) {
+        setSelectedSigil(relatedSigils[0]);
+      }
+      
+      // Add a visual pulse to all sigils in this timeline node
+      setSigilPositions(prev => 
+        prev.map(pos => ({
+          ...pos,
+          scale: pos.timelineNodeId === nodeId ? 1.2 : pos.scale,
+          opacity: pos.timelineNodeId === nodeId ? 1 : pos.opacity
+        }))
+      );
+      
+      // Gradually return to normal size
+      setTimeout(() => {
+        setSigilPositions(prev => 
+          prev.map(pos => ({
+            ...pos,
+            scale: pos.timelineNodeId === nodeId ? 1.1 : pos.scale,
+            opacity: pos.timelineNodeId === nodeId ? 0.9 : pos.opacity
+          }))
+        );
+      }, 300);
     }
   };
   
-  const handleSigilDrop = (sigil: Sigil, x: number, y: number) => {
+  const handleSigilDrop = async (sigil: Sigil, x: number, y: number) => {
     // Check if dropped on a timeline node
     const droppedNode = timelineNodes.find(node => {
       const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
@@ -150,26 +206,130 @@ const EchoCompassPage: React.FC = () => {
       activateChakra(droppedNode.chakra);
       
       // Award XP for timeline navigation
-      addXP(15);
+      await addXP(15);
+      
+      // Log to continuum_sessions
+      try {
+        await supabase.from('continuum_sessions').insert([{
+          user_id: user!.id,
+          session_type: 'sigil_alignment',
+          xp_awarded: 15,
+          chakra: droppedNode.chakra,
+          frequency: getChakraFrequency(droppedNode.chakra),
+          timestamp: new Date().toISOString()
+        }]);
+      } catch (error) {
+        console.error('Error logging session:', error);
+      }
       
       // Update sigil position to align with the node
       setSigilPositions(prev =>
         prev.map(pos =>
           pos.sigil.id === sigil.id
-            ? { ...pos, x: droppedNode.x, y: droppedNode.y, resonance: 1 }
+            ? { 
+                ...pos, 
+                x: droppedNode.x, 
+                y: droppedNode.y, 
+                resonance: 1,
+                timelineNodeId: droppedNode.id 
+              }
             : pos
         )
       );
+      
+      setSelectedSigil(sigil);
     } else {
       // Update sigil position in the nexus field
       setSigilPositions(prev =>
         prev.map(pos =>
           pos.sigil.id === sigil.id
-            ? { ...pos, x, y }
+            ? { ...pos, x, y, timelineNodeId: undefined }
             : pos
         )
       );
     }
+  };
+  
+  const handleSigilClick = (sigil: Sigil) => {
+    setSelectedSigil(sigil);
+    
+    // Pulse the sigil to show it's selected
+    setSigilPositions(prev => 
+      prev.map(pos => ({
+        ...pos,
+        scale: pos.sigil.id === sigil.id ? 1.3 : pos.scale,
+        opacity: pos.sigil.id === sigil.id ? 1 : pos.opacity
+      }))
+    );
+    
+    // Gradually return to normal size
+    setTimeout(() => {
+      setSigilPositions(prev => 
+        prev.map(pos => ({
+          ...pos,
+          scale: pos.sigil.id === sigil.id ? 1.1 : pos.scale,
+          opacity: pos.sigil.id === sigil.id ? 0.9 : pos.opacity
+        }))
+      );
+    }, 300);
+  };
+  
+  const fetchEvolutionHistory = async () => {
+    if (!selectedSigil) return;
+    
+    try {
+      // In a real implementation, you would fetch the evolution history
+      // Here we'll simulate it with a subset of sigils
+      const evolutionData = sigils
+        .filter(s => 
+          s.parameters.chakra === selectedSigil.parameters.chakra || 
+          s.parameters.intention.includes(selectedSigil.parameters.intention.substring(0, 5))
+        )
+        .slice(0, 5);
+      
+      setEvolutionHistory(evolutionData);
+      setShowEvolution(true);
+    } catch (error) {
+      console.error('Error fetching sigil evolution:', error);
+    }
+  };
+  
+  const downloadSigil = () => {
+    if (!selectedSigil) return;
+    
+    // Create SVG blob
+    const svgString = selectedSigil.parameters.svg;
+    const blob = new Blob([svgString], {type: "image/svg+xml"});
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sigil-${selectedSigil.id.substring(0, 8)}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  
+  const refreshSigilPositions = () => {
+    // Redistribute sigils in a more harmonious pattern
+    const newPositions = sigilPositions.map((pos, index) => {
+      // Create a golden ratio-based spiral placement
+      const phi = 1.618033988749895;
+      const angle = index * phi * Math.PI;
+      const radius = 50 + (index * 15);
+      
+      return {
+        ...pos,
+        x: 400 + Math.cos(angle) * radius,
+        y: 300 + Math.sin(angle) * radius,
+      };
+    });
+    
+    setSigilPositions(newPositions);
   };
   
   const renderBackground = () => {
@@ -203,9 +363,45 @@ const EchoCompassPage: React.FC = () => {
           dash={[5, 5]}
         />
       );
+      
+      // Add a line from center to each node
+      elements.push(
+        <Line
+          key={`center-to-${index}`}
+          points={[compassSize.width / 2, compassSize.height / 2, node.x, node.y]}
+          stroke={chakraState.color}
+          strokeWidth={0.5}
+          opacity={0.15}
+        />
+      );
     });
     
     return elements;
+  };
+  
+  // Helper function to get chakra frequency
+  const getChakraFrequency = (chakra: ChakraType): number => {
+    const frequencies: Record<ChakraType, number> = {
+      Root: 396,
+      Sacral: 417,
+      SolarPlexus: 528,
+      Heart: 639,
+      Throat: 741,
+      ThirdEye: 852,
+      Crown: 963
+    };
+    
+    return frequencies[chakra];
+  };
+  
+  // Format sigil creation date
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
   
   return (
@@ -221,7 +417,7 @@ const EchoCompassPage: React.FC = () => {
           Echo Compass & Sigil Nexus
         </SacredHeading>
         <p className="text-gray-400 text-lg">
-          Navigate your sacred timeline and witness your sigils in the quantum field
+          Navigate your sacred timeline and witness how your sigils resonate in the quantum field
         </p>
       </div>
       
@@ -287,7 +483,7 @@ const EchoCompassPage: React.FC = () => {
             </div>
           </motion.div>
           
-          {/* Sigil Count */}
+          {/* Sigil Details */}
           <motion.div
             className="bg-dark-200 p-4 rounded-2xl border border-dark-300 shadow-chakra-glow"
             initial={{ opacity: 0, x: -20 }}
@@ -299,16 +495,115 @@ const EchoCompassPage: React.FC = () => {
                 <Eye size={20} className="mr-2" style={{ color: chakraState.color }} />
                 <h3 className="text-lg font-medium text-white">Sigil Nexus</h3>
               </div>
-              <span className="text-sm text-gray-400">{sigils.length} sigils</span>
+              <div className="flex">
+                <button 
+                  className="p-1.5 rounded-lg mr-2 hover:bg-dark-100 text-gray-400 hover:text-gray-200"
+                  onClick={refreshSigilPositions}
+                  title="Realign Sigils"
+                >
+                  <RefreshCw size={18} />
+                </button>
+                <span className="text-sm text-gray-400">{sigils.length} sigils</span>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 mb-3">
-              Your sigils exist in the quantum field. Drag them to timeline nodes to activate their energy.
-            </p>
-            {isLoading && (
-              <div className="flex justify-center">
+            
+            {isLoading ? (
+              <div className="flex justify-center py-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2" style={{ borderColor: chakraState.color }}></div>
               </div>
+            ) : selectedSigil ? (
+              <div>
+                <div className="p-3 rounded-lg bg-dark-300 mb-3">
+                  <div className="font-medium text-white mb-1 line-clamp-1" title={selectedSigil.parameters.intention}>
+                    {selectedSigil.parameters.intention}
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <div>{selectedSigil.parameters.chakra} Chakra</div>
+                    <div>{selectedSigil.parameters.frequency} Hz</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setShowSigilDetails(!showSigilDetails)}
+                    className="w-full py-1.5 px-3 text-sm flex items-center justify-center rounded-md bg-dark-300 text-gray-300 hover:bg-dark-400"
+                  >
+                    <Info size={14} className="mr-1" />
+                    {showSigilDetails ? "Hide Details" : "View Details"}
+                  </button>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={downloadSigil}
+                      className="flex-1 py-1.5 px-3 text-sm flex items-center justify-center rounded-md bg-dark-300 text-gray-300 hover:bg-dark-400"
+                      title="Download Sigil"
+                    >
+                      <Download size={14} className="mr-1" />
+                      Download
+                    </button>
+                    
+                    <button
+                      onClick={fetchEvolutionHistory}
+                      className="flex-1 py-1.5 px-3 text-sm flex items-center justify-center rounded-md bg-dark-300 text-gray-300 hover:bg-dark-400"
+                    >
+                      <Zap size={14} className="mr-1" />
+                      Evolution
+                    </button>
+                  </div>
+                </div>
+                
+                {showSigilDetails && (
+                  <div className="mt-3 p-3 rounded-lg bg-dark-300 text-xs space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Created:</span>
+                      <span className="text-gray-200">{formatDate(selectedSigil.created_at)}</span>
+                    </div>
+                    
+                    {selectedSigil.parameters.archetypeKey && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Archetype:</span>
+                        <span className="text-gray-200">{selectedSigil.parameters.archetypeKey}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Life Path:</span>
+                      <span className="text-gray-200">{selectedSigil.parameters.numerology_profile?.lifePath || 'Unknown'}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Timeline:</span>
+                      <span className="text-gray-200">
+                        {sigilPositions.find(p => p.sigil.id === selectedSigil.id)?.timelineNodeId
+                          ? timelineNodes.find(n => n.id === sigilPositions.find(p => p.sigil.id === selectedSigil.id)?.timelineNodeId)?.name
+                          : 'Unaligned'
+                        }
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-400 text-sm">
+                <p>Select a sigil to view details</p>
+              </div>
             )}
+          </motion.div>
+          
+          {/* Create New Sigil */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <TattooButton
+              chakraColor={chakraState.color}
+              onClick={() => window.location.href = '/sigils'}
+              className="w-full flex items-center justify-center"
+            >
+              <Plus size={16} className="mr-1" />
+              Create New Sigil
+            </TattooButton>
           </motion.div>
         </div>
         
@@ -337,6 +632,11 @@ const EchoCompassPage: React.FC = () => {
             </div>
             
             <div className="relative">
+              {/* Mystical mathematical background */}
+              <div className="absolute inset-0 pointer-events-none">
+                <FloatingFormulas density="low" />
+              </div>
+              
               <Stage 
                 width={compassSize.width} 
                 height={compassSize.height}
@@ -378,9 +678,21 @@ const EchoCompassPage: React.FC = () => {
                       key={position.sigil.id}
                       position={position}
                       onDrop={handleSigilDrop}
-                      isSelected={draggedSigil?.id === position.sigil.id}
+                      onClick={() => handleSigilClick(position.sigil)}
+                      isSelected={selectedSigil?.id === position.sigil.id}
                     />
                   ))}
+                  
+                  {/* User Node - Shows the user's position in the quantum field */}
+                  <Circle
+                    x={compassSize.width / 2}
+                    y={compassSize.height / 2}
+                    radius={15}
+                    fill={`${chakraState.color}80`}
+                    shadowColor={chakraState.color}
+                    shadowBlur={20}
+                    shadowOpacity={0.8}
+                  />
                 </Layer>
               </Stage>
               
@@ -393,6 +705,9 @@ const EchoCompassPage: React.FC = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="text-sm">
+                    <span className="font-medium" style={{ color: timelineNodes.find(n => n.id === selectedNode)?.color }}>
+                      {timelineNodes.find(n => n.id === selectedNode)?.name}:
+                    </span>{' '}
                     {timelineNodes.find(n => n.id === selectedNode)?.description}
                   </div>
                 </motion.div>
@@ -400,22 +715,76 @@ const EchoCompassPage: React.FC = () => {
             </div>
           </motion.div>
           
-          {/* Action Bar */}
-          <div className="mt-4 flex justify-between items-center">
-            <div className="text-sm text-gray-400">
-              Drag sigils to timeline nodes to activate their temporal resonance
-            </div>
-            <TattooButton
-              chakraColor={chakraState.color}
-              onClick={() => window.location.href = '/sigils'}
-              size="sm"
-              className="flex items-center"
+          {/* Evolution Panel (conditionally rendered) */}
+          {showEvolution && selectedSigil && (
+            <motion.div
+              className="mt-4 bg-dark-200 p-4 rounded-2xl border border-dark-300 shadow-chakra-glow"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <Plus size={16} className="mr-1" />
-              Create New Sigil
-            </TattooButton>
-          </div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-medium text-white">Sigil Evolution Path</h3>
+                <button 
+                  onClick={() => setShowEvolution(false)}
+                  className="text-gray-400 hover:text-gray-200"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="flex overflow-x-auto space-x-4 p-2">
+                {evolutionHistory.length > 0 ? (
+                  evolutionHistory.map((sigil, index) => (
+                    <div 
+                      key={sigil.id} 
+                      className="flex-shrink-0 w-24 h-32 flex flex-col items-center"
+                      onClick={() => setSelectedSigil(sigil)}
+                    >
+                      <div 
+                        className={`w-20 h-20 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer transition-all ${
+                          selectedSigil.id === sigil.id ? 'ring-2' : ''
+                        }`}
+                        style={{ 
+                          backgroundColor: `${chakraState.color}20`,
+                          ringColor: chakraState.color 
+                        }}
+                        dangerouslySetInnerHTML={{ __html: sigil.parameters.svg }}
+                      />
+                      <div className="text-xs text-center mt-1">
+                        <div className="text-gray-300 truncate w-20">{formatDate(sigil.created_at)}</div>
+                        <div className="text-gray-500 text-xs">Stage {index + 1}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full text-center py-2 text-gray-400">
+                    No evolution history available
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
+      </div>
+      
+      {/* Floating animated glyphs for mystical effect */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <AnimatedGlyph 
+          type="vesica" 
+          size={60} 
+          color={`${chakraState.color}10`} 
+          animation="breathe"
+          className="absolute top-20 left-20"
+        />
+        <AnimatedGlyph 
+          type="spiral" 
+          size={80} 
+          color={`${chakraState.color}08`} 
+          animation="rotate"
+          className="absolute bottom-32 right-32"
+        />
       </div>
     </div>
   );
@@ -425,11 +794,34 @@ const EchoCompassPage: React.FC = () => {
 interface SigilNodeProps {
   position: SigilPosition;
   onDrop: (sigil: Sigil, x: number, y: number) => void;
+  onClick: () => void;
   isSelected: boolean;
 }
 
-const SigilNode: React.FC<SigilNodeProps> = ({ position, onDrop, isSelected }) => {
-  const [image] = useImage(`data:image/svg+xml;base64,${btoa(position.sigil.parameters.svg)}`);
+const SigilNode: React.FC<SigilNodeProps> = ({ position, onDrop, onClick, isSelected }) => {
+  const [image] = useImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(position.sigil.parameters.svg)}`);
+  const { chakraState } = useChakra();
+  
+  // Determine if the sigil has a Tesla number frequency (3, 6, 9)
+  const hasTeslaFrequency = position.sigil.parameters.frequency.toString().includes('3') || 
+                           position.sigil.parameters.frequency.toString().includes('6') || 
+                           position.sigil.parameters.frequency.toString().includes('9');
+  
+  // Get sigil chakra color
+  const getSigilColor = (): string => {
+    const chakraType = position.sigil.parameters.chakra;
+    const chakraColors: Record<string, string> = {
+      Root: 'var(--chakra-root)',
+      Sacral: 'var(--chakra-sacral)',
+      SolarPlexus: 'var(--chakra-solarplexus)',
+      Heart: 'var(--chakra-heart)',
+      Throat: 'var(--chakra-throat)',
+      ThirdEye: 'var(--chakra-thirdeye)',
+      Crown: 'var(--chakra-crown)'
+    };
+    
+    return chakraColors[chakraType] || chakraState.color;
+  };
   
   return (
     <Group
@@ -442,7 +834,18 @@ const SigilNode: React.FC<SigilNodeProps> = ({ position, onDrop, isSelected }) =
       opacity={position.opacity}
       scaleX={position.scale}
       scaleY={position.scale}
+      onClick={onClick}
     >
+      {/* Background glow */}
+      <Circle
+        radius={20}
+        fill={`${getSigilColor()}30`}
+        shadowBlur={isSelected ? 15 : 5}
+        shadowColor={getSigilColor()}
+        shadowOpacity={isSelected ? 0.8 : 0.3}
+      />
+      
+      {/* Sigil image */}
       {image && (
         <KonvaImage
           image={image}
@@ -452,12 +855,23 @@ const SigilNode: React.FC<SigilNodeProps> = ({ position, onDrop, isSelected }) =
           offsetY={20}
         />
       )}
+      
+      {/* Energy field - pulsates more for Tesla numbers */}
       <Circle
-        radius={25}
-        stroke={position.sigil.parameters.chakra ? `var(--chakra-${position.sigil.parameters.chakra.toLowerCase()})` : '#666'}
-        strokeWidth={1}
-        opacity={0.5}
+        radius={25 * (hasTeslaFrequency ? 1.2 : 1)}
+        stroke={position.sigil.parameters.chakra ? getSigilColor() : '#666'}
+        strokeWidth={isSelected ? 2 : 1}
+        opacity={hasTeslaFrequency ? 0.7 : 0.4}
       />
+      
+      {/* Timeline connection line if assigned to a node */}
+      {position.timelineNodeId && (
+        <Circle
+          radius={5}
+          fill={getSigilColor()}
+          opacity={0.5}
+        />
+      )}
     </Group>
   );
 };
