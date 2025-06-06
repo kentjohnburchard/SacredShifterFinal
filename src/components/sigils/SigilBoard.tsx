@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { Stage, Layer, Image, Transformer } from 'react-konva';
+import React, { useState, useRef, useEffect } from 'react';
+import { Stage, Layer, Image, Transformer, Text } from 'react-konva';
 import Konva from 'konva';
 import useImage from 'use-image';
 import { Sigil, SigilSticker } from '../../types';
+import { useChakra } from '../../context/ChakraContext';
 
 interface SigilBoardProps {
   sigils: Sigil[];
@@ -20,18 +21,21 @@ interface SigilImageProps {
   onChange: (newAttrs: SigilSticker) => void;
 }
 
-const SigilImage = React.forwardRef<Konva.Image, SigilImageProps>(({ 
+const SigilImage: React.FC<SigilImageProps> = ({ 
   sigil, 
   sticker, 
   isSelected, 
   onSelect,
   onChange 
-}, ref) => {
+}) => {
   const shapeRef = useRef<Konva.Image>(null);
   const trRef = useRef<Konva.Transformer>(null);
+  const { chakraState } = useChakra();
+  
+  // Use the useImage hook from react-konva to load the SVG
   const [image] = useImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(sigil.parameters.svg)}`);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (isSelected && shapeRef.current && trRef.current) {
       // Attach transformer
       trRef.current.nodes([shapeRef.current]);
@@ -74,16 +78,8 @@ const SigilImage = React.forwardRef<Konva.Image, SigilImageProps>(({
   
   return (
     <>
-      {image && <Image
-        ref={(node) => {
-          // Forward ref to parent component if needed
-          if (typeof ref === 'function') {
-            ref(node);
-          } else if (ref) {
-            ref.current = node;
-          }
-          shapeRef.current = node;
-        }}
+      <Image
+        ref={shapeRef}
         image={image}
         x={sticker.x}
         y={sticker.y}
@@ -99,7 +95,10 @@ const SigilImage = React.forwardRef<Konva.Image, SigilImageProps>(({
         onTap={onSelect}
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
-      />}
+        shadowColor={isSelected ? chakraState.color : undefined}
+        shadowBlur={isSelected ? 10 : 0}
+        shadowOpacity={0.6}
+      />
       {isSelected && (
         <Transformer
           ref={trRef}
@@ -110,11 +109,18 @@ const SigilImage = React.forwardRef<Konva.Image, SigilImageProps>(({
             }
             return newBox;
           }}
+          enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+          rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
+          rotateEnabled={true}
+          borderStroke={chakraState.color}
+          anchorStroke={chakraState.color}
+          anchorFill={chakraState.color}
+          anchorSize={8}
         />
       )}
     </>
   );
-});
+};
 
 const SigilBoard: React.FC<SigilBoardProps> = ({
   sigils,
@@ -124,14 +130,15 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
   height = 600
 }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { chakraState } = useChakra();
+  const stageRef = useRef<Konva.Stage>(null);
   
   const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     // Deselect when clicking on empty area
     const clickedOnStage = e.target === e.target.getStage();
     const clickedOnLayer = e.target.getType() === 'Layer';
-    const clickedOnEmpty = clickedOnStage || clickedOnLayer;
     
-    if (clickedOnEmpty) {
+    if (clickedOnStage || clickedOnLayer) {
       setSelectedId(null);
     }
   };
@@ -145,11 +152,17 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
   
   return (
     <Stage
-      width={width || 800}
-      height={height || 600}
+      width={width}
+      height={height}
       onMouseDown={checkDeselect}
       onTouchStart={checkDeselect}
-      style={{ backgroundColor: '#f0f0f0', borderRadius: '8px' }}
+      style={{ 
+        backgroundColor: '#f9f9f9', 
+        borderRadius: '8px',
+        backgroundImage: 'radial-gradient(circle at 10px 10px, #f0f0f0 2px, transparent 0)',
+        backgroundSize: '20px 20px'
+      }}
+      ref={stageRef}
     >
       <Layer>
         {stickers.map((sticker) => {
@@ -157,7 +170,7 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
           if (!sigil) return null;
           
           return (
-            <SigilImage 
+            <SigilImage
               key={sticker.sigil_id}
               sigil={sigil}
               sticker={sticker}
@@ -167,20 +180,19 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
             />
           );
         })}
-      </Layer>
-      {stickers.length === 0 && (
-        <Layer>
-          <Konva.Text
-            x={width / 2 - 100}
+        
+        {stickers.length === 0 && (
+          <Text
+            text="Add sigils from the palette to create your board"
+            x={width / 2 - 150}
             y={height / 2 - 10}
-            text="Add sigils from the palette"
-            fontSize={16}
-            fill="#999"
+            width={300}
             align="center"
-            width={200}
+            fontSize={14}
+            fill="#999"
           />
-        </Layer>
-      )}
+        )}
+      </Layer>
     </Stage>
   );
 };
