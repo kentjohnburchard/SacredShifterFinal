@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Sigil, SigilSticker } from '../types';
+import { useChakra } from '../context/ChakraContext';
 import SigilBoard from '../components/sigils/SigilBoard';
 import SigilPreview from '../components/sigils/SigilPreview';
-import { Download, Plus, Edit, Trash2, Save } from 'lucide-react';
+import { Download, Plus, Edit, Trash2, Save, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SigilBoardData {
   id: string;
@@ -17,6 +19,7 @@ interface SigilBoardData {
 
 const SigilBoardPage: React.FC = () => {
   const { user } = useAuth();
+  const { chakraState } = useChakra();
   const [sigils, setSigils] = useState<Sigil[]>([]);
   const [boards, setBoards] = useState<SigilBoardData[]>([]);
   const [activeBoard, setActiveBoard] = useState<SigilBoardData | null>(null);
@@ -27,6 +30,7 @@ const SigilBoardPage: React.FC = () => {
   const [isCreatingBoard, setIsCreatingBoard] = useState(false);
   const [newBoardName, setNewBoardName] = useState('');
   const [newBoardDescription, setNewBoardDescription] = useState('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   useEffect(() => {
     if (user) {
@@ -151,6 +155,7 @@ const SigilBoardPage: React.FC = () => {
   
   const handleSaveBoard = async () => {
     if (!activeBoard) return;
+    console.log("Saving board with stickers:", boardStickers);
     
     try {
       setIsSaving(true);
@@ -175,7 +180,8 @@ const SigilBoardPage: React.FC = () => {
       setBoards(updatedBoards);
       setActiveBoard({ ...activeBoard, stickers: boardStickers, updated_at: new Date().toISOString() });
       
-      alert('Board saved successfully!');
+      setSuccessMessage('Board saved successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error('Error saving board:', error);
       alert('Failed to save board. Please try again.');
@@ -186,6 +192,7 @@ const SigilBoardPage: React.FC = () => {
   
   const handleAddSigilToBoard = () => {
     if (!selectedSigil || !activeBoard) return;
+    console.log("Adding sigil to board:", selectedSigil.id);
     
     // Check if sigil is already on the board
     const existing = boardStickers.find(sticker => sticker.sigil_id === selectedSigil.id);
@@ -196,7 +203,7 @@ const SigilBoardPage: React.FC = () => {
     
     // Create a new sticker
     const newSticker: SigilSticker = {
-      sigil_id: selectedSigil.id,
+      sigil_id: selectedSigil.id, 
       x: Math.random() * 400 + 100, // Random position
       y: Math.random() * 300 + 100,
       rotation: Math.random() * 30 - 15, // Random slight rotation
@@ -205,6 +212,7 @@ const SigilBoardPage: React.FC = () => {
     };
     
     setBoardStickers([...boardStickers, newSticker]);
+    console.log("Updated stickers:", [...boardStickers, newSticker]);
   };
   
   return (
@@ -246,8 +254,12 @@ const SigilBoardPage: React.FC = () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={handleCreateBoard}
-                    disabled={!newBoardName.trim() || isSaving}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm disabled:bg-indigo-300"
+                    disabled={!newBoardName.trim() || isSaving} 
+                    className="px-3 py-1 rounded-md text-sm text-white disabled:opacity-50"
+                    style={{ 
+                      backgroundColor: chakraState.color,
+                      opacity: !newBoardName.trim() || isSaving ? 0.5 : 1
+                    }}
                   >
                     {isSaving ? 'Creating...' : 'Create'}
                   </button>
@@ -317,10 +329,13 @@ const SigilBoardPage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
                       {sigils.map(sigil => (
                         <div 
-                          key={sigil.id} 
+                          key={sigil.id}
                           className={`rounded-md cursor-pointer transition-transform hover:scale-105 ${
-                            selectedSigil?.id === sigil.id ? 'ring-2 ring-indigo-500' : ''
+                            selectedSigil?.id === sigil.id ? 'ring-2' : ''
                           }`}
+                          style={{ 
+                            ringColor: selectedSigil?.id === sigil.id ? chakraState.color : undefined 
+                          }}
                           onClick={() => setSelectedSigil(sigil)}
                         >
                           <SigilPreview sigil={sigil} size="sm" />
@@ -331,7 +346,11 @@ const SigilBoardPage: React.FC = () => {
                     <button
                       onClick={handleAddSigilToBoard}
                       disabled={!selectedSigil || !activeBoard}
-                      className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md disabled:bg-indigo-300"
+                      className="w-full py-2 px-4 text-white rounded-md disabled:opacity-50"
+                      style={{ 
+                        backgroundColor: chakraState.color,
+                        opacity: !selectedSigil || !activeBoard ? 0.5 : 1
+                      }}
                     >
                       Add to Board
                     </button>
@@ -344,6 +363,21 @@ const SigilBoardPage: React.FC = () => {
         
         {/* Right column: Board canvas */}
         <div className="lg:col-span-3">
+          {successMessage && (
+            <motion.div 
+              className="mb-4 p-3 rounded-md text-white"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{ backgroundColor: chakraState.color }}
+            >
+              <div className="flex items-center">
+                <Info size={16} className="mr-2" />
+                {successMessage}
+              </div>
+            </motion.div>
+          )}
+          
           {activeBoard ? (
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center justify-between mb-4">
@@ -357,7 +391,11 @@ const SigilBoardPage: React.FC = () => {
                 <button
                   onClick={handleSaveBoard}
                   disabled={isSaving}
-                  className="flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-md text-sm disabled:bg-indigo-300"
+                  className="flex items-center px-3 py-1.5 text-white rounded-md text-sm disabled:opacity-50"
+                  style={{ 
+                    backgroundColor: chakraState.color,
+                    opacity: isSaving ? 0.5 : 1
+                  }}
                 >
                   {isSaving ? (
                     <>
@@ -377,7 +415,10 @@ const SigilBoardPage: React.FC = () => {
                 <SigilBoard
                   sigils={sigils}
                   stickers={boardStickers}
-                  onStickersChange={setBoardStickers}
+                  onStickersChange={(newStickers) => {
+                    console.log("Stickers changed:", newStickers);
+                    setBoardStickers(newStickers);
+                  }}
                   width={800}
                   height={600}
                 />
@@ -408,13 +449,16 @@ const SigilBoardPage: React.FC = () => {
               <p className="text-gray-500 mb-4">
                 Create a new board to start arranging your sigils into meaningful patterns.
               </p>
-              <button
-                onClick={() => setIsCreatingBoard(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+              <a
+                href="/sigils"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{ 
+                  backgroundColor: chakraState.color,
+                  boxShadow: `0 0 10px ${chakraState.color}40`
+                }}
               >
-                <Plus size={16} className="mr-1" />
-                Create Board
-              </button>
+                Go to Sigil Generator
+              </a>
             </div>
           )}
         </div>
