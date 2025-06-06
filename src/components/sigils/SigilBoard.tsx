@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Stage, Layer, Image, Transformer } from 'react-konva';
 import Konva from 'konva';
+import useImage from 'use-image';
 import { Sigil, SigilSticker } from '../../types';
 
 interface SigilBoardProps {
@@ -19,16 +20,16 @@ interface SigilImageProps {
   onChange: (newAttrs: SigilSticker) => void;
 }
 
-const SigilImage: React.FC<SigilImageProps> = ({ 
+const SigilImage = React.forwardRef<Konva.Image, SigilImageProps>(({ 
   sigil, 
   sticker, 
   isSelected, 
   onSelect,
   onChange 
-}) => {
+}, ref) => {
   const shapeRef = useRef<Konva.Image>(null);
   const trRef = useRef<Konva.Transformer>(null);
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [image] = useImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(sigil.parameters.svg)}`);
   
   React.useEffect(() => {
     if (isSelected && shapeRef.current && trRef.current) {
@@ -37,24 +38,6 @@ const SigilImage: React.FC<SigilImageProps> = ({
       trRef.current.getLayer()?.batchDraw();
     }
   }, [isSelected]);
-  
-  React.useEffect(() => {
-    // Convert SVG to Image
-    const svgString = sigil.parameters.svg;
-    const svg = new Blob([svgString], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(svg);
-    
-    const img = new window.Image();
-    img.onload = () => {
-      setImage(img);
-    };
-    img.src = url;
-    
-    // Cleanup
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [sigil]);
   
   const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
     onChange({
@@ -91,8 +74,16 @@ const SigilImage: React.FC<SigilImageProps> = ({
   
   return (
     <>
-      <Image
-        ref={shapeRef}
+      {image && <Image
+        ref={(node) => {
+          // Forward ref to parent component if needed
+          if (typeof ref === 'function') {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+          shapeRef.current = node;
+        }}
         image={image}
         x={sticker.x}
         y={sticker.y}
@@ -108,7 +99,7 @@ const SigilImage: React.FC<SigilImageProps> = ({
         onTap={onSelect}
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
-      />
+      />}
       {isSelected && (
         <Transformer
           ref={trRef}
@@ -123,7 +114,7 @@ const SigilImage: React.FC<SigilImageProps> = ({
       )}
     </>
   );
-};
+});
 
 const SigilBoard: React.FC<SigilBoardProps> = ({
   sigils,
@@ -136,7 +127,10 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
   
   const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     // Deselect when clicking on empty area
-    const clickedOnEmpty = e.target === e.target.getStage();
+    const clickedOnStage = e.target === e.target.getStage();
+    const clickedOnLayer = e.target.getType() === 'Layer';
+    const clickedOnEmpty = clickedOnStage || clickedOnLayer;
+    
     if (clickedOnEmpty) {
       setSelectedId(null);
     }
@@ -151,11 +145,11 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
   
   return (
     <Stage
-      width={width}
-      height={height}
+      width={width || 800}
+      height={height || 600}
       onMouseDown={checkDeselect}
       onTouchStart={checkDeselect}
-      style={{ backgroundColor: '#f9f9f9', borderRadius: '8px' }}
+      style={{ backgroundColor: '#f0f0f0', borderRadius: '8px' }}
     >
       <Layer>
         {stickers.map((sticker) => {
@@ -163,7 +157,7 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
           if (!sigil) return null;
           
           return (
-            <SigilImage
+            <SigilImage 
               key={sticker.sigil_id}
               sigil={sigil}
               sticker={sticker}
@@ -174,6 +168,19 @@ const SigilBoard: React.FC<SigilBoardProps> = ({
           );
         })}
       </Layer>
+      {stickers.length === 0 && (
+        <Layer>
+          <Konva.Text
+            x={width / 2 - 100}
+            y={height / 2 - 10}
+            text="Add sigils from the palette"
+            fontSize={16}
+            fill="#999"
+            align="center"
+            width={200}
+          />
+        </Layer>
+      )}
     </Stage>
   );
 };
