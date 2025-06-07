@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChakra } from '../context/ChakraContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import RuneButton from '../components/ui/RuneButton';
+import MysticalHeading from '../components/ui/MysticalHeading';
+import { Compass, User, Mail, Lock, ArrowLeft } from 'lucide-react';
 
 const SignupPage: React.FC = () => {
   const { signUp } = useAuth();
@@ -45,37 +48,90 @@ const SignupPage: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-dark-900 flex flex-col justify-center">
+    <div className="min-h-screen bg-ink-black flex flex-col justify-center">
       <div className="max-w-md w-full mx-auto">
         <motion.div 
-          className="bg-dark-200 shadow-lg rounded-2xl px-8 pt-6 pb-8 mb-4 border border-dark-300"
+          className="glass-dark shadow-lg rounded-2xl px-8 pt-6 pb-8 mb-4 border border-ink-accent"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-8">
             <Link to="/" className="inline-block mb-6">
-              <div className="text-3xl font-heading font-bold text-white">
-                Sacred <span className="opacity-70">Shifter</span>
-              </div>
+              <motion.div 
+                className="flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <motion.div 
+                  className="w-12 h-12 rounded-full mr-3 flex items-center justify-center overflow-hidden relative"
+                  animate={{ 
+                    boxShadow: [
+                      `0 0 3px ${chakraState.color}`,
+                      `0 0 6px ${chakraState.color}`,
+                      `0 0 9px ${chakraState.color}`
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 9,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    times: [0, 0.33, 0.66, 1]
+                  }}
+                  style={{ backgroundColor: `${chakraState.color}20` }}
+                >
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ rotate: 360 }}
+                    transition={{ 
+                      duration: 9, 
+                      repeat: Infinity, 
+                      ease: "linear" 
+                    }}
+                  >
+                    <Compass className="w-6 h-6 text-white" />
+                  </motion.div>
+                </motion.div>
+                
+                <div className="text-3xl font-mystical font-bold text-white">
+                  Sacred <span className="opacity-70">Shifter</span>
+                </div>
+              </motion.div>
             </Link>
-            <h2 className="text-2xl font-bold mb-2 text-white">Create Your Account</h2>
-            <p className="text-gray-400">Begin your journey of spiritual transformation</p>
+            <MysticalHeading 
+              as="h2" 
+              className="text-2xl mb-2"
+              chakraColor={chakraState.color}
+              withGlow
+              withUnderline={false}
+            >
+              Create Your Account
+            </MysticalHeading>
+            <p className="text-gray-400 font-sacred">Begin your journey of spiritual transformation</p>
           </div>
           
-          {error && (
-            <div className="mb-6 p-3 bg-red-900 text-red-100 rounded-md text-sm">
-              {error}
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                className="mb-6 p-3 bg-red-900 text-red-100 rounded-xl text-sm"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="fullName">
+              <label className="block text-gray-300 text-sm font-sacred mb-2 flex items-center" htmlFor="fullName">
+                <User size={14} className="mr-2 opacity-70" />
                 Full Name
               </label>
               <input
-                className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-dark-300 border-dark-400 text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
+                className="shadow appearance-none border rounded-xl w-full py-3 px-4 bg-ink-shadow border-ink-accent text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
                 id="fullName"
                 type="text"
                 placeholder="Enter your full name"
@@ -86,11 +142,12 @@ const SignupPage: React.FC = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
+              <label className="block text-gray-300 text-sm font-sacred mb-2 flex items-center" htmlFor="email">
+                <Mail size={14} className="mr-2 opacity-70" />
                 Email
               </label>
               <input
-                className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-dark-300 border-dark-400 text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
+                className="shadow appearance-none border rounded-xl w-full py-3 px-4 bg-ink-shadow border-ink-accent text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
                 id="email"
                 type="email"
                 placeholder="Enter your email"
@@ -101,11 +158,12 @@ const SignupPage: React.FC = () => {
               />
             </div>
             <div className="mb-6">
-              <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="password">
+              <label className="block text-gray-300 text-sm font-sacred mb-2 flex items-center" htmlFor="password">
+                <Lock size={14} className="mr-2 opacity-70" />
                 Password
               </label>
               <input
-                className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-dark-300 border-dark-400 text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
+                className="shadow appearance-none border rounded-xl w-full py-3 px-4 bg-ink-shadow border-ink-accent text-white leading-tight focus:outline-none focus:ring-2 focus:border-transparent"
                 id="password"
                 type="password"
                 placeholder="••••••••"
@@ -114,20 +172,16 @@ const SignupPage: React.FC = () => {
                 style={{ focusRingColor: chakraState.color }}
                 required
               />
-              <p className="text-gray-500 text-xs mt-1">Password must be at least 6 characters</p>
+              <p className="text-gray-500 text-xs mt-1 font-sacred">Password must be at least 6 characters</p>
             </div>
             <div className="mb-6">
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
-                style={{ 
-                  backgroundColor: chakraState.color,
-                  boxShadow: `0 0 15px ${chakraState.color}40`,
-                  focusRingColor: chakraState.color
-                }}
+              <RuneButton
                 type="submit"
+                variant="primary"
+                chakraColor={chakraState.color}
+                className="w-full"
                 disabled={isSubmitting}
+                runeSymbol="א"
               >
                 {isSubmitting ? (
                   <>
@@ -140,10 +194,10 @@ const SignupPage: React.FC = () => {
                 ) : (
                   'Sign Up'
                 )}
-              </motion.button>
+              </RuneButton>
             </div>
             <div className="text-center">
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-sm font-sacred">
                 Already have an account?{' '}
                 <Link 
                   to="/login" 
@@ -158,8 +212,8 @@ const SignupPage: React.FC = () => {
         </motion.div>
         
         <div className="text-center">
-          <Link to="/" className="text-gray-400 text-sm hover:text-white">
-            ← Back to Home
+          <Link to="/" className="text-gray-400 text-sm hover:text-white flex items-center justify-center">
+            <ArrowLeft size={14} className="mr-1" /> Back to Home
           </Link>
         </div>
       </div>

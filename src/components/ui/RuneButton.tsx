@@ -77,7 +77,7 @@ const RuneButton: React.FC<RuneButtonProps> = ({
     
     return (
       <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg width="100%\" height="100%\" viewBox="0 0 100 100\" preserveAspectRatio="none">
           <path
             d={`M${20 + seed % 10},${20 + seed % 15} L${80 - seed % 10},${20 + seed % 5} L${80 - seed % 15},${80 - seed % 10} L${20 + seed % 5},${80 - seed % 5} Z`}
             stroke="currentColor"
