@@ -26,6 +26,11 @@ const FloatingFormulas: React.FC<FloatingFormulasProps> = ({
     'ψ(x,t) = Ae^(i(kx-ωt))',
     'θ = 2π/3',
     'λ = h/p'
+   '3-6-9 = ∞',
+   'r = φ^n × θ',
+   '∫ e^x dx = e^x + C',
+   'G_μν = 8πT_μν',
+   'S = k log W'
   ]);
   
   const getFormulaCount = () => {

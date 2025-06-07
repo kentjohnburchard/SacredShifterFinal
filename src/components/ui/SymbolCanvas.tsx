@@ -114,7 +114,7 @@ const SymbolCanvas: React.FC<SymbolCanvasProps> = ({
       // Draw 6 outer points in a hexagon
       const points = [];
       for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI / 3) + (time * tesla3 % tesla9);
+        const angle = (i * Math.PI / 3) + (time * 0.1);
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
         
@@ -129,7 +129,7 @@ const SymbolCanvas: React.FC<SymbolCanvasProps> = ({
       // Draw inner points (another hexagon, rotated)
       const innerPoints = [];
       for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI / 3) + (Math.PI / 6) + (time * tesla3 % tesla9);
+        const angle = (i * Math.PI / 3) + (Math.PI / 6) + (time * 0.1);
         const x = Math.cos(angle) * radius * 0.6;
         const y = Math.sin(angle) * radius * 0.6;
         
@@ -335,7 +335,7 @@ const SymbolCanvas: React.FC<SymbolCanvasProps> = ({
       // Draw each circle
       circles.forEach((circle, i) => {
         // Rotation animation for sacred geometry effect
-        const rotationAngle = time * (i % 3 === 0 ? 0.3 : i % 3 === 1 ? 0.6 : 0.9);
+        const rotationAngle = time * (i % 3 === 0 ? 0.3 : i % 3 === 1 ? 0.6 : 0.9) * 0.5;
         const x = circle.x * Math.cos(rotationAngle) - circle.y * Math.sin(rotationAngle);
         const y = circle.x * Math.sin(rotationAngle) + circle.y * Math.cos(rotationAngle);
         
@@ -343,7 +343,7 @@ const SymbolCanvas: React.FC<SymbolCanvasProps> = ({
         ctx.arc(x, y, baseRadius, 0, Math.PI * 2);
         
         // Apply Tesla 369 pattern to opacity
-        const opacityModulator = Math.sin(time * (i % 3 === 0 ? 3 : i % 3 === 1 ? 6 : 9) / 10) * 0.2 + 0.3;
+        const opacityModulator = Math.sin(time * (i % 3 === 0 ? 3 : i % 3 === 1 ? 6 : 9) / 10) * 0.2 + 0.4;
         
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacityModulator * intensity})`;
         ctx.lineWidth = 1;
@@ -351,7 +351,7 @@ const SymbolCanvas: React.FC<SymbolCanvasProps> = ({
         
         // Add subtle fill for visual depth
         if (i < 7) { // Only fill the central circle and first ring
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.05 * intensity})`;
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.03 * intensity})`;
           ctx.fill();
         }
       });
