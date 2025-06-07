@@ -96,6 +96,7 @@ const Sidebar: React.FC = () => {
             <NavItem icon={<Home size={20} />} to="/dashboard" label="Dashboard" isActive={isActive('/dashboard')} index={0} />
             <NavItem icon={<Navigation size={20} />} to="/echo-compass" label="Echo Compass" isActive={isAnyActive(['/echo-compass', '/grid-map', '/timeline-selector'])} index={1} />
             <NavItem icon={<Aperture size={20} />} to="/sigils" label="Soul Sigils" isActive={isActive('/sigils')} index={2} />
+            <NavItem icon={<BookOpen size={20} />} to="/sacred-library" label="Sacred Library" isActive={isActive('/sacred-library')} index={3} />
             <NavItem icon={<Layout size={20} />} to="/sigil-gallery" label="Sigil Gallery" isActive={isActive('/sigil-gallery')} index={3} />
             <NavItem icon={<Layout size={20} />} to="/sigil-board" label="Sigil Board" isActive={isActive('/sigil-board')} index={4} />
             <NavItem icon={<Calendar size={20} />} to="/tasks" label="Sacred Tasks" isActive={isActive('/tasks')} index={5} />

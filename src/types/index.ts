@@ -231,3 +231,53 @@ export interface QuantumField {
   dominantFrequency: number;
   activeLaws: string[];
 }
+
+// Sacred Library types
+export interface LibraryItem {
+  id: string;
+  title: string;
+  description?: string;
+  file_url: string;
+  thumbnail_url?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  chakra?: ChakraType;
+  timeline?: 'past' | 'present' | 'future';
+  frequency_hz?: number;
+  tags?: string[];
+  is_locked: boolean;
+  media_type: 'audio' | 'video' | 'pdf' | 'image' | 'text';
+  duration_seconds?: number;
+  view_count: number;
+}
+
+export interface LibraryPlaylist {
+  id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  is_shared: boolean;
+  cover_image_url?: string;
+  item_count: number;
+}
+
+export interface PlaylistItem {
+  id: string;
+  playlist_id: string;
+  item_id: string;
+  position: number;
+  added_at: string;
+  item?: LibraryItem;
+}
+
+export interface LibraryComment {
+  id: string;
+  item_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user?: UserProfile;
+}

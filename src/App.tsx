@@ -23,6 +23,11 @@ import SigilEvolutionMap from './pages/SigilEvolutionMap';
 import SigilBoardPage from './pages/SigilBoardPage';
 import ProfilePage from './pages/ProfilePage';
 import SacredCirclePage from './pages/SacredCirclePage';
+import SacredLibraryPage from './pages/SacredLibraryPage';
+import MediaPlayerPage from './pages/MediaPlayerPage';
+import PlaylistsPage from './pages/PlaylistsPage';
+import PlaylistDetailPage from './pages/PlaylistDetailPage';
+import UploadPage from './pages/UploadPage';
 import CircleDetailPage from './pages/CircleDetailPage';
 import ResonanceSessionPage from './pages/ResonanceSessionPage';
 import EchoCompassPage from './pages/EchoCompassPage';
@@ -65,6 +70,11 @@ function App() {
                     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
                     <Route path="/sacred-circle" element={<RequireAuth><SacredCirclePage /></RequireAuth>} />
                     <Route path="/sacred-circle/:id" element={<RequireAuth><CircleDetailPage /></RequireAuth>} />
+                    <Route path="/sacred-library" element={<RequireAuth><SacredLibraryPage /></RequireAuth>} />
+                    <Route path="/sacred-library/media/:id" element={<RequireAuth><MediaPlayerPage /></RequireAuth>} />
+                    <Route path="/sacred-library/playlists" element={<RequireAuth><PlaylistsPage /></RequireAuth>} />
+                    <Route path="/sacred-library/playlists/:id" element={<RequireAuth><PlaylistDetailPage /></RequireAuth>} />
+                    <Route path="/sacred-library/upload" element={<RequireAuth><UploadPage /></RequireAuth>} />
                     <Route path="/sacred-circle/:circleId/session/:sessionId" element={<RequireAuth><ResonanceSessionPage /></RequireAuth>} />
                     <Route path="/echo-compass" element={<RequireAuth><EchoCompassPage /></RequireAuth>} />
                     <Route path="/sacred-library" element={<RequireAuth><SacredLibraryPage /></RequireAuth>} />
