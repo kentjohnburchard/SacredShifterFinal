@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useCodex } from '../../context/CodexContext';
 import { useChakra } from '../../context/ChakraContext';
 import { Sigil, SigilEvolutionStage } from '../../types';
-import { Sprout, Flower, Star, Seedling, Zap } from 'lucide-react';
+import { Sprout, Flower, Star, Scaling as Seedling, Zap } from 'lucide-react';
 import TattooButton from '../ui/TattooButton';
 
 interface SigilEvolutionPanelProps {
