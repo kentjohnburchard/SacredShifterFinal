@@ -86,7 +86,20 @@ const OSDock: React.FC = () => {
   const location = useLocation();
   const { chakraState } = useChakra();
   const dragControls = useDragControls();
-  const [position, setPosition] = useState({ x: 20, y: window.innerHeight / 2 });
+  // Store position in localStorage to persist between page refreshes
+  const getInitialPosition = () => {
+    const savedPosition = localStorage.getItem('osDockPosition');
+    if (savedPosition) {
+      try {
+        return JSON.parse(savedPosition);
+      } catch (e) {
+        console.error("Error parsing saved position:", e);
+      }
+    }
+    return { x: 20, y: window.innerHeight / 2 };
+  };
+  
+  const [position, setPosition] = useState(getInitialPosition);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSnapping, setIsSnapping] = useState(false);
   const [nearestAnchor, setNearestAnchor] = useState<AnchorPoint | null>(null);
@@ -97,6 +110,8 @@ const OSDock: React.FC = () => {
   const [anchorPoints, setAnchorPoints] = useState<AnchorPoint[]>([]);
   // Add a recovery mechanism to ensure the dock is always visible
   const [isVisible, setIsVisible] = useState(true);
+  // Track if the dock is being dragged
+  const [isDragging, setIsDragging] = useState(false);
   
   useEffect(() => {
     // Create anchor points based on window dimensions
@@ -130,7 +145,9 @@ const OSDock: React.FC = () => {
     const recoveryInterval = setInterval(() => {
       if (!isVisible) {
         console.log("Recovering lost dock...");
-        setPosition({ x: 20, y: window.innerHeight / 2 });
+        const newPosition = { x: 20, y: window.innerHeight / 2 };
+        setPosition(newPosition);
+        localStorage.setItem('osDockPosition', JSON.stringify(newPosition));
         setIsVisible(true);
         setIsCollapsed(false);
       }
@@ -141,6 +158,44 @@ const OSDock: React.FC = () => {
       clearInterval(recoveryInterval);
     };
   }, []);
+  
+  // Ensure the dock stays within viewport bounds
+  useEffect(() => {
+    // Skip during drag operations to avoid interference
+    if (isDragging) return;
+    
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Check if dock is outside viewport and fix if needed
+    let newX = position.x;
+    let newY = position.y;
+    let needsUpdate = false;
+    
+    // Ensure x is within bounds (with 60px buffer for visibility)
+    if (newX < 0) {
+      newX = 20;
+      needsUpdate = true;
+    } else if (newX > windowWidth - 60) {
+      newX = windowWidth - 80;
+      needsUpdate = true;
+    }
+    
+    // Ensure y is within bounds (with 60px buffer for visibility)
+    if (newY < 60) {
+      newY = 60;
+      needsUpdate = true;
+    } else if (newY > windowHeight - 60) {
+      newY = windowHeight - 60;
+      needsUpdate = true;
+    }
+    
+    if (needsUpdate) {
+      const newPosition = { x: newX, y: newY };
+      setPosition(newPosition);
+      localStorage.setItem('osDockPosition', JSON.stringify(newPosition));
+    }
+  }, [position, isDragging]);
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -234,6 +289,20 @@ const OSDock: React.FC = () => {
     }
   };
   
+  // Save position to localStorage
+  const savePosition = (newPosition: { x: number, y: number }) => {
+    localStorage.setItem('osDockPosition', JSON.stringify(newPosition));
+  };
+  
+  // Reset dock position
+  const resetDockPosition = () => {
+    const newPosition = { x: 20, y: window.innerHeight / 2 };
+    setPosition(newPosition);
+    savePosition(newPosition);
+    setIsVisible(true);
+    setIsCollapsed(false);
+  };
+  
   return (
     <>
       {/* Drag trail elements */}
@@ -285,11 +354,7 @@ const OSDock: React.FC = () => {
       {/* Emergency recovery button - always visible */}
       <div 
         className="fixed bottom-4 right-4 z-[100] p-2 rounded-full bg-dark-200 border border-dark-300 cursor-pointer"
-        onClick={() => {
-          setPosition({ x: 20, y: window.innerHeight / 2 });
-          setIsVisible(true);
-          setIsCollapsed(false);
-        }}
+        onClick={resetDockPosition}
         title="Recover OS Dock"
         style={{ 
           boxShadow: `0 0 10px ${chakraState.color}40`,
@@ -310,6 +375,7 @@ const OSDock: React.FC = () => {
         dragControls={dragControls}
         dragMomentum={false}
         onDragStart={() => {
+          setIsDragging(true);
           setIsSnapping(true);
           setShowAnchorPoints(true);
         }}
@@ -324,22 +390,37 @@ const OSDock: React.FC = () => {
           setNearestAnchor(nearest);
         }}
         onDragEnd={(event, info) => {
+          setIsDragging(false);
+          
           // Check if near an anchor point
           const nearest = findNearestAnchor(info.point.x, info.point.y);
           
+          let newPosition;
           if (nearest) {
             // Snap to anchor point
-            setPosition({
+            newPosition = {
               x: nearest.x,
               y: nearest.y
-            });
+            };
           } else {
             // Update position after drag ends
-            setPosition({
+            newPosition = {
               x: position.x + info.offset.x,
               y: position.y + info.offset.y
-            });
+            };
           }
+          
+          // Ensure the dock stays within viewport bounds
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
+          
+          // Apply bounds checking
+          newPosition.x = Math.max(20, Math.min(windowWidth - 80, newPosition.x));
+          newPosition.y = Math.max(60, Math.min(windowHeight - 60, newPosition.y));
+          
+          // Update position and save to localStorage
+          setPosition(newPosition);
+          savePosition(newPosition);
           
           setIsSnapping(false);
           setShowAnchorPoints(false);
@@ -380,14 +461,13 @@ const OSDock: React.FC = () => {
             
             <motion.button
               className="w-5 h-5 rounded-full flex items-center justify-center text-gray-400 hover:text-white"
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsCollapsed(!isCollapsed);
+              }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               title={isCollapsed ? "Expand dock" : "Collapse dock"}
-             onClickCapture={(e) => {
-               e.stopPropagation(); // Prevent event bubbling
-               setIsCollapsed(!isCollapsed);
-             }}
             >
               {isCollapsed ? <Maximize size={10} /> : <Minimize size={10} />}
             </motion.button>
@@ -418,10 +498,12 @@ const OSDock: React.FC = () => {
               title="Move left"
               onClick={() => {
                // Ensure we don't move off-screen
-                setPosition({
+                const newPosition = {
                   x: Math.max(20, position.x - 50),
                   y: position.y
-                });
+                };
+                setPosition(newPosition);
+                savePosition(newPosition);
               }}
             >
               <ChevronLeft size={10} />
@@ -434,10 +516,12 @@ const OSDock: React.FC = () => {
               title="Move right"
               onClick={() => {
                // Ensure we don't move off-screen
-                setPosition({
+                const newPosition = {
                   x: Math.min(window.innerWidth - 80, position.x + 50),
                   y: position.y
-                });
+                };
+                setPosition(newPosition);
+                savePosition(newPosition);
               }}
             >
               <ChevronRight size={10} />
@@ -580,7 +664,10 @@ const OSDock: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-           onClick={() => setIsCollapsed(false)}
+           onClick={(e) => {
+             e.stopPropagation();
+             setIsCollapsed(false);
+           }}
           >
             <motion.div
               className="w-8 h-8 rounded-full flex items-center justify-center"
