@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 import { useChakra } from '../../context/ChakraContext';
 import { 
   Home, 
@@ -71,6 +71,8 @@ const DockItem: React.FC<DockItemProps> = ({ icon, to, label, isActive, chakraCo
 const OSDock: React.FC = () => {
   const location = useLocation();
   const { chakraState } = useChakra();
+  const dragControls = useDragControls();
+  const [position, setPosition] = React.useState({ x: 20, y: '50%' });
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -108,11 +110,34 @@ const OSDock: React.FC = () => {
   
   return (
     <motion.div 
-      className="os-dock fixed left-4 top-1/2 transform -translate-y-1/2 z-50"
+      className="os-dock fixed z-50"
+      style={{ 
+        left: position.x,
+        top: position.y,
+        transform: typeof position.y === 'string' ? 'translateY(-50%)' : 'none'
+      }}
+      drag
+      dragControls={dragControls}
+      dragMomentum={false}
+      onDragEnd={(event, info) => {
+        // Update position after drag ends
+        setPosition(prev => ({
+          x: typeof prev.x === 'number' ? prev.x + info.offset.x : info.point.x,
+          y: typeof prev.y === 'number' ? prev.y + info.offset.y : info.point.y
+        }));
+      }}
+      whileDrag={{ scale: 1.02, boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)' }}
       variants={dockVariants}
       initial="hidden"
       animate="visible"
     >
+      {/* Drag handle */}
+      <motion.div 
+        className="w-full h-3 flex items-center justify-center mb-1 cursor-move"
+        onPointerDown={(e) => dragControls.start(e)}
+      >
+        <div className="w-10 h-1 bg-ink-accent rounded-full opacity-60 hover:opacity-100" />
+      </motion.div>
       <motion.div variants={itemVariants}>
         <DockItem 
           icon={<Home size={20} />} 

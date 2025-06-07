@@ -60,69 +60,92 @@ const SacredCirclePage: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Fetch circles I've created
-      const { data: createdCircles, error: createdError } = await supabase
-        .from('circles')
-        .select('*')
-        .eq('creator_id', user.id)
-        .order('created_at', { ascending: false });
-        
-      if (createdError) throw createdError;
-      
-      // Fetch circles I'm a member of
-      const { data: memberCircles, error: memberError } = await supabase
-        .from('circle_members')
-        .select('circle_id')
-        .eq('user_id', user.id);
-        
-      if (memberError) throw memberError;
-      
-      if (memberCircles && memberCircles.length > 0) {
-        const circleIds = memberCircles.map(cm => cm.circle_id);
-        
-        const { data: joinedCircles, error: joinedError } = await supabase
+      // Fetch circles I've created with error handling
+      let createdCircles: Circle[] = [];
+      try {
+        const { data, error } = await supabase
           .from('circles')
           .select('*')
-          .in('id', circleIds)
+          .eq('creator_id', user.id)
           .order('created_at', { ascending: false });
           
-        if (joinedError) throw joinedError;
-        
-        // Combine both lists, removing duplicates
-        const allMyCirclesMap = new Map();
-        [...(createdCircles || []), ...(joinedCircles || [])].forEach(circle => {
-          allMyCirclesMap.set(circle.id, circle);
-        });
-        
-        const myCirclesList = Array.from(allMyCirclesMap.values());
-        setMyCircles(myCirclesList);
-        
-        // Set active circle to first one
-        if (myCirclesList.length > 0) {
-          setActiveCircle(myCirclesList[0]);
+        if (error) {
+          console.error('Error fetching created circles:', error);
+        } else {
+          createdCircles = data || [];
         }
-      } else {
-        setMyCircles(createdCircles || []);
-        
-        // Set active circle to first one
-        if (createdCircles && createdCircles.length > 0) {
-          setActiveCircle(createdCircles[0]);
-        }
+      } catch (error) {
+        console.error('Error fetching created circles:', error);
       }
       
-      // Also fetch some public circles for discovery
-      const { data: publicCircles, error: publicError } = await supabase
-        .from('circles')
-        .select('*')
-        .order('love_level', { ascending: false })
-        .limit(10);
-        
-      if (publicError) throw publicError;
+      // Fetch circles I'm a member of with error handling
+      let joinedCircles: Circle[] = [];
+      try {
+        const { data: memberCircles, error: memberError } = await supabase
+          .from('circle_members')
+          .select('circle_id')
+          .eq('user_id', user.id);
+          
+        if (memberError) {
+          console.error('Error fetching member circles:', memberError);
+        } else if (memberCircles && memberCircles.length > 0) {
+          const circleIds = memberCircles.map(cm => cm.circle_id);
+          
+          const { data, error: joinedError } = await supabase
+            .from('circles')
+            .select('*')
+            .in('id', circleIds)
+            .order('created_at', { ascending: false });
+            
+          if (joinedError) {
+            console.error('Error fetching joined circles:', joinedError);
+          } else {
+            joinedCircles = data || [];
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching member circles:', error);
+      }
       
-      setCircles(publicCircles || []);
+      // Combine both lists, removing duplicates
+      const allMyCirclesMap = new Map();
+      [...createdCircles, ...joinedCircles].forEach(circle => {
+        allMyCirclesMap.set(circle.id, circle);
+      });
+      
+      const myCirclesList = Array.from(allMyCirclesMap.values());
+      setMyCircles(myCirclesList);
+      
+      // Set active circle to first one
+      if (myCirclesList.length > 0) {
+        setActiveCircle(myCirclesList[0]);
+      }
+        
+      // Fetch some public circles for discovery with error handling
+      try {
+        const { data: publicCircles, error: publicError } = await supabase
+          .from('circles')
+          .select('*')
+          .order('love_level', { ascending: false })
+          .limit(10);
+          
+        if (publicError) {
+          console.error('Error fetching public circles:', publicError);
+          setCircles([]);
+        } else {
+          setCircles(publicCircles || []);
+        }
+      } catch (error) {
+        console.error('Error fetching public circles:', error);
+        setCircles([]);
+      }
       
     } catch (error) {
-      console.error('Error fetching circles:', error);
+      console.error('Unexpected error in fetchCircles:', error);
+      // Set safe defaults
+      setCircles([]);
+      setMyCircles([]);
+      setActiveCircle(null);
     } finally {
       setIsLoading(false);
     }
