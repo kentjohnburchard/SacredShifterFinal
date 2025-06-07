@@ -6,10 +6,11 @@ import { useChakra } from '../context/ChakraContext';
 import { supabase } from '../lib/supabase';
 import { Circle, ChakraType } from '../types';
 import { motion } from 'framer-motion';
-import { Users, Grid, Activity, MessageSquare, Calendar, Plus, Settings, Zap, Compass } from 'lucide-react';
+import { Users, Grid, Activity, MessageSquare, Calendar, Plus, Settings, Zap, Compass, Heart } from 'lucide-react';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 import FloatingFormulas from '../components/ui/FloatingFormulas';
+import { ChakraBadge } from '../components/chakra/ChakraBadge';
 
 // Import Sacred Circle components
 import CircleRings from '../components/circles/CircleRings';
@@ -575,13 +576,13 @@ const SacredCirclePage: React.FC = () => {
 // Helper functions
 const getChakraColor = (chakra: string): string => {
   const chakraColors: Record<string, string> = {
-    Root: 'var(--chakra-root)',
-    Sacral: 'var(--chakra-sacral)',
-    SolarPlexus: 'var(--chakra-solarplexus)',
-    Heart: 'var(--chakra-heart)',
-    Throat: 'var(--chakra-throat)',
-    ThirdEye: 'var(--chakra-thirdeye)',
-    Crown: 'var(--chakra-crown)'
+    Root: '#C62828',
+    Sacral: '#FF5722',
+    SolarPlexus: '#FFC107',
+    Heart: '#4CAF50',
+    Throat: '#2196F3',
+    ThirdEye: '#673AB7',
+    Crown: '#9C27B0'
   };
   
   return chakraColors[chakra] || '#ffffff';
