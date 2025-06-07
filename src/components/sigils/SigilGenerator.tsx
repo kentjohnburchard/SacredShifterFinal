@@ -435,3 +435,5 @@ const chakraColors: Record<ChakraType, string> = {
 };
 
 export default SigilGenerator;
+
+export default SigilGenerator
