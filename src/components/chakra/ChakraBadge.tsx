@@ -8,13 +8,15 @@ interface ChakraBadgeProps {
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
   onClick?: (chakra: ChakraType) => void;
+  className?: string;
 }
 
 const ChakraBadge: React.FC<ChakraBadgeProps> = ({ 
   chakra, 
   showLabel = true, 
   size = 'md',
-  onClick
+  onClick,
+  className = ''
 }) => {
   const { chakraState, activateChakra } = useChakra();
   const displayChakra = chakra || chakraState.type;
@@ -70,11 +72,11 @@ const ChakraBadge: React.FC<ChakraBadgeProps> = ({
   
   return (
     <div 
-      className={`flex items-center ${onClick || chakra ? 'cursor-pointer' : ''}`}
+      className={`flex items-center ${onClick || chakra ? 'cursor-pointer' : ''} ${className}`}
       onClick={handleClick}
     >
       <motion.div 
-        className={`rounded-full ${sizeClasses[size]} mr-1.5 relative tesla-field`}
+        className={`rounded-full ${sizeClasses[size]} ${showLabel ? 'mr-1.5' : ''} relative tesla-field`}
         animate={{ 
           boxShadow: [
             `0 0 3px ${color}80`,
@@ -97,7 +99,11 @@ const ChakraBadge: React.FC<ChakraBadgeProps> = ({
           className="absolute inset-0 rounded-full overflow-hidden"
           style={{ opacity: 0.4 }}
           animate={{ rotate: 360 }}
-          transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+          transition={{ 
+            duration: isTeslaNumber ? 9 : 12, 
+            repeat: Infinity, 
+            ease: "linear" 
+          }}
         >
           <div className="w-full h-full sacred-geometry-bg"></div>
         </motion.div>
@@ -105,7 +111,7 @@ const ChakraBadge: React.FC<ChakraBadgeProps> = ({
       
       {showLabel && (
         <motion.span 
-          className={`${textSize[size]} font-medium`} 
+          className={`${textSize[size]} font-sacred font-medium`} 
           style={{ color }}
           animate={{ 
             textShadow: isTeslaNumber ? [

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useChakra } from '../../context/ChakraContext';
 
 interface SacredHeadingProps {
   children: React.ReactNode;
@@ -12,16 +13,21 @@ interface SacredHeadingProps {
   withAnimation?: boolean;
 }
 
-const SacredHeading: React.FC<SacredHeadingProps> = ({
+const SacredHeading = React.forwardRef<HTMLHeadingElement, SacredHeadingProps>(({
   children,
   as = 'h2',
   className = '',
-  chakraColor,
+  chakraColor: propChakraColor,
   withGlow = false,
   withUnderline = false,
   centered = false,
   withAnimation = false,
-}) => {
+}, ref) => {
+  const { chakraState } = useChakra();
+  
+  // Use provided chakra color or default to the active chakra color
+  const chakraColor = propChakraColor || chakraState.color;
+
   const getHeadingStyles = (): React.CSSProperties => {
     if (!chakraColor) return {};
 
@@ -35,19 +41,23 @@ const SacredHeading: React.FC<SacredHeadingProps> = ({
     <>
       {children}
       {withUnderline && (
-        <div 
-          className="mt-1 h-0.5 rounded-full"
+        <motion.div 
+          className="mt-2 h-0.5 rounded-full mx-auto"
           style={{ 
-            background: chakraColor,
-            boxShadow: withGlow ? `0 0 8px ${chakraColor || 'rgba(255,255,255,0.5)'}` : undefined
+            background: `linear-gradient(90deg, transparent, ${chakraColor}, transparent)`,
+            boxShadow: withGlow ? `0 0 8px ${chakraColor}60` : undefined,
+            width: centered ? '60%' : '100%'
           }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
         />
       )}
     </>
   );
 
   const baseClasses = `
-    sacred-heading
+    font-sacred font-semibold tracking-wider leading-tight
     ${centered ? 'text-center' : ''}
     ${className}
   `;
@@ -57,6 +67,7 @@ const SacredHeading: React.FC<SacredHeadingProps> = ({
     return React.createElement(
       motion.div,
       {
+        ref,
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.6, ease: "easeOut" },
@@ -73,9 +84,9 @@ const SacredHeading: React.FC<SacredHeadingProps> = ({
   // Default without animation
   return React.createElement(
     as,
-    { className: baseClasses, style: getHeadingStyles() },
+    { ref, className: baseClasses, style: getHeadingStyles() },
     headingContent
   );
-};
+});
 
 export default SacredHeading;

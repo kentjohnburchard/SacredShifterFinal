@@ -2,7 +2,7 @@ import React from 'react';
 import { ChakraType } from '../../types';
 import { useChakra } from '../../context/ChakraContext';
 import ChakraBadge from '../chakra/ChakraBadge';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChakraSelectorProps {
   value?: ChakraType;
@@ -19,7 +19,7 @@ const ChakraSelector: React.FC<ChakraSelectorProps> = ({
   layout = 'horizontal', 
   className = '' 
 }) => {
-  const { chakraState } = useChakra();
+  const { chakraState, activateChakra } = useChakra();
   const currentValue = value || chakraState.type;
   
   const chakraOptions: ChakraType[] = [
@@ -54,39 +54,65 @@ const ChakraSelector: React.FC<ChakraSelectorProps> = ({
   
   const handleSelect = (chakra: ChakraType) => {
     onChange(chakra);
+    activateChakra(chakra);
   };
   
   return (
     <div className={`${getLayoutClasses()} ${className}`}>
-      {chakraOptions.map((chakra) => (
-        <motion.button
-          key={chakra}
-          type="button"
-          onClick={() => handleSelect(chakra)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-          className={`rounded-md transition-colors ${getButtonSizeClasses()} ${
-            currentValue === chakra
-              ? 'ring-2 font-medium'
-              : 'bg-dark-300 text-gray-400 hover:bg-dark-200'
-          }`}
-          style={{
-            backgroundColor: currentValue === chakra 
-              ? `${chakraColors[chakra]}20` 
-              : undefined,
-            color: currentValue === chakra 
-              ? chakraColors[chakra] 
-              : undefined,
-            ringColor: currentValue === chakra 
-              ? chakraColors[chakra] 
-              : undefined
-          }}
-        >
-          <div className="flex items-center justify-center">
-            <ChakraBadge chakra={chakra} size={size} showLabel={true} />
-          </div>
-        </motion.button>
-      ))}
+      <AnimatePresence>
+        {chakraOptions.map((chakra) => (
+          <motion.button
+            key={chakra}
+            type="button"
+            onClick={() => handleSelect(chakra)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`rounded-xl transition-colors ${getButtonSizeClasses()} ${
+              currentValue === chakra
+                ? 'ring-2 font-medium'
+                : 'bg-ink-shadow text-gray-400 hover:bg-ink-muted'
+            }`}
+            style={{
+              backgroundColor: currentValue === chakra 
+                ? `${chakraColors[chakra]}20` 
+                : undefined,
+              color: currentValue === chakra 
+                ? chakraColors[chakra] 
+                : undefined,
+              ringColor: currentValue === chakra 
+                ? chakraColors[chakra] 
+                : undefined
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center justify-center">
+              <ChakraBadge chakra={chakra} size={size} showLabel={true} />
+            </div>
+            
+            {/* Subtle glow effect for active chakra */}
+            {currentValue === chakra && (
+              <motion.div
+                className="absolute inset-0 rounded-xl z-0"
+                animate={{ 
+                  boxShadow: [
+                    `0 0 5px ${chakraColors[chakra]}30`,
+                    `0 0 10px ${chakraColors[chakra]}40`,
+                    `0 0 5px ${chakraColors[chakra]}30`
+                  ]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              />
+            )}
+          </motion.button>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

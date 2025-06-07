@@ -11,9 +11,10 @@ interface MysticalHeadingProps {
   centered?: boolean;
   withAnimation?: boolean;
   runicStyle?: boolean;
+  chakraColor?: string;
 }
 
-const MysticalHeading: React.FC<MysticalHeadingProps> = ({
+const MysticalHeading = React.forwardRef<HTMLHeadingElement, MysticalHeadingProps>(({
   children,
   as = 'h2',
   className = '',
@@ -22,14 +23,18 @@ const MysticalHeading: React.FC<MysticalHeadingProps> = ({
   centered = false,
   withAnimation = true,
   runicStyle = false,
-}) => {
+  chakraColor: propChakraColor,
+}, ref) => {
   const { chakraState } = useChakra();
+  
+  // Use provided chakra color or default to the active chakra color
+  const chakraColor = propChakraColor || chakraState.color;
   
   const getHeadingStyles = (): React.CSSProperties => {
     return {
-      color: withGlow ? chakraState.color : undefined,
-      textShadow: withGlow ? `0 0 20px ${chakraState.color}50, 0 0 40px ${chakraState.color}30` : undefined,
-      fontFamily: runicStyle ? "'Eczar', serif" : "'Cardo', serif",
+      color: withGlow ? chakraColor : undefined,
+      textShadow: withGlow ? `0 0 20px ${chakraColor}50, 0 0 40px ${chakraColor}30` : undefined,
+      fontFamily: runicStyle ? "'Eczar', serif" : "'Playfair Display', serif",
     };
   };
 
@@ -40,8 +45,8 @@ const MysticalHeading: React.FC<MysticalHeadingProps> = ({
         <motion.div 
           className="mt-2 h-0.5 rounded-full mx-auto"
           style={{ 
-            background: `linear-gradient(90deg, transparent, ${chakraState.color}, transparent)`,
-            boxShadow: withGlow ? `0 0 8px ${chakraState.color}60` : undefined,
+            background: `linear-gradient(90deg, transparent, ${chakraColor}, transparent)`,
+            boxShadow: withGlow ? `0 0 8px ${chakraColor}60` : undefined,
             width: centered ? '60%' : '100%'
           }}
           initial={{ scaleX: 0 }}
@@ -53,9 +58,8 @@ const MysticalHeading: React.FC<MysticalHeadingProps> = ({
   );
 
   const baseClasses = `
-    font-sacred font-semibold tracking-wider leading-tight
+    ${runicStyle ? 'font-mystical' : 'font-heading'} font-semibold tracking-wider leading-tight
     ${centered ? 'text-center' : ''}
-    ${runicStyle ? 'font-mystical' : ''}
     ${className}
   `;
 
@@ -64,6 +68,7 @@ const MysticalHeading: React.FC<MysticalHeadingProps> = ({
     return React.createElement(
       motion.div,
       {
+        ref,
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.8, ease: "easeOut" },
@@ -80,9 +85,9 @@ const MysticalHeading: React.FC<MysticalHeadingProps> = ({
   // Default without animation
   return React.createElement(
     as,
-    { className: baseClasses, style: getHeadingStyles() },
+    { ref, className: baseClasses, style: getHeadingStyles() },
     headingContent
   );
-};
+});
 
 export default MysticalHeading;

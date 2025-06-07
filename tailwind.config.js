@@ -5,10 +5,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'heading': ['Cardo', 'Cormorant Garamond', 'serif'],
-        'body': ['Inter', 'sans-serif'],
+        'heading': ['Playfair Display', 'Cardo', 'Cormorant Garamond', 'serif'],
+        'body': ['Cormorant Garamond', 'Inter', 'sans-serif'],
         'mystical': ['Eczar', 'Rosarivo', 'serif'],
-        'sacred': ['Cardo', 'serif']
+        'sacred': ['Cormorant Garamond', 'Cardo', 'serif'],
+        'rune': ['Eczar', 'monospace']
       },
       colors: {
         // Chakra colors with updated values
@@ -30,6 +31,15 @@ export default {
           900: '#121212',
         },
         // Mystical color palette
+        ink: {
+          black: '#0a0a12',
+          deep: '#121218',
+          shadow: '#1a1a24',
+          muted: '#2a2a36',
+          accent: '#3a3a48',
+          light: '#8a8a9a',
+          white: '#f8f8fa',
+        },
         mystical: {
           void: '#0a0a1a',
           shadow: '#1a1a2e',
@@ -78,7 +88,9 @@ backgroundImage: {
   'gradient-void': 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%)',
   'gradient-ethereal': 'linear-gradient(135deg, #9d4edd 0%, #7209b7 50%, #560bad 100%)',
   'gradient-tesla': 'linear-gradient(333deg, #3c3c3c, #6c6c6c, #9c9c9c)',
-  'gradient-phi': 'linear-gradient(137.5deg, #d4af37, #c0c0c0)',
+  'gradient-phi': 'linear-gradient(137.5deg, #d4af37, #c0c0c0)', 
+  'gradient-ink': 'linear-gradient(to bottom, rgba(10,10,18,0.92), rgba(10,10,18,0.96))',
+  'gradient-ink-radial': 'radial-gradient(circle at 50% 50%, var(--chakra-color, #9d4edd)20, transparent 70%)',
 },
 
       animation: {
@@ -92,6 +104,10 @@ backgroundImage: {
         'sacred-rotate': 'sacredRotate 20s linear infinite',
         'ethereal-drift': 'etherealDrift 15s ease-in-out infinite',
         'mystic-breathe': 'mysticBreathe 4s ease-in-out infinite',
+        'ink-shimmer': 'inkShimmer 1.5s ease-in-out',
+        'ink-spread': 'inkSpread 3s infinite cubic-bezier(0.3, 0, 0.6, 1)',
+        'ink-pulse': 'inkPulse 3s infinite cubic-bezier(0.3, 0, 0.6, 1)',
+        'cursor-ripple': 'cursorRipple 1s ease-out forwards',
       },
       keyframes: {
         chakraPulse: {
@@ -143,6 +159,23 @@ backgroundImage: {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.02)' },
         },
+        inkShimmer: {
+          '0%': { left: '-100%' },
+          '100%': { left: '100%' },
+        },
+        inkSpread: {
+          '0%': { transform: 'scale(1)', opacity: 0.7 },
+          '50%': { transform: 'scale(1.1)', opacity: 0.9 },
+          '100%': { transform: 'scale(1)', opacity: 0.7 },
+        },
+        inkPulse: {
+          '0%, 100%': { opacity: 0.7 },
+          '50%': { opacity: 1 },
+        },
+        cursorRipple: {
+          '0%': { opacity: 1, transform: 'translate(-50%, -50%) scale(0.3)' },
+          '100%': { opacity: 0, transform: 'translate(-50%, -50%) scale(2)' },
+        },
       },
       boxShadow: {
         'glow-sm': '0 0 10px rgba(255, 255, 255, 0.2)',
@@ -157,6 +190,9 @@ backgroundImage: {
         'mystical': '0 0 50px rgba(157, 78, 221, 0.2)',
         'rune-border': 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(157, 78, 221, 0.3)',
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        'ink-spread': '0 0 60px rgba(0, 0, 0, 0.3)',
+        'ink-glow': '0 0 15px var(--chakra-color, rgba(157, 78, 221, 0.3))',
+        'ink-etch': 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
       },
       aspectRatio: {
         'golden': '1.618',

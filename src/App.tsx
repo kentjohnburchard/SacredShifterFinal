@@ -31,9 +31,10 @@ import UploadPage from './pages/UploadPage';
 import CircleDetailPage from './pages/CircleDetailPage';
 import ResonanceSessionPage from './pages/ResonanceSessionPage';
 import EchoCompassPage from './pages/EchoCompassPage';
-import Layout from './components/layout/Layout';
+import MetaphysicalLayout from './components/layout/MetaphysicalLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import ErrorBoundary from './components/ErrorBoundary';
+import './styles/inkStyles.css';
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
-                  <Route element={<Layout />}>
+                  <Route element={<MetaphysicalLayout />}>
                     <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
                     <Route path="/blueprint" element={<RequireAuth><BlueprintPage /></RequireAuth>} />
                     <Route path="/sigils" element={<RequireAuth><SigilGeneratorPage /></RequireAuth>} />
