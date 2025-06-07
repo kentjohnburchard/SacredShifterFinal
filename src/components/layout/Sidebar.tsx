@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Aperture, Calendar, Feather, Star, Users, BarChart2, Layout, Compass, Book, Wand2, Moon, BookOpen, Navigation } from 'lucide-react';
+import { Home, Aperture, Calendar, Feather, Star, Users, BarChart2, Layout, Compass, Book, Wand2, Moon, BookOpen, Navigation, Music } from 'lucide-react';
 import { useChakra } from '../../context/ChakraContext';
 import { motion } from 'framer-motion';
 
