@@ -24,7 +24,7 @@ const TattooButton = React.forwardRef<HTMLButtonElement, TattooButtonProps>(({
   chakraColor: propChakraColor,
 }, ref) => {
   const { chakraState } = useChakra();
-}) => {
+
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-xs',
     md: 'px-4 py-2 text-sm',
@@ -100,7 +100,7 @@ const TattooButton = React.forwardRef<HTMLButtonElement, TattooButtonProps>(({
       
       {/* Content */}
       <span className="relative z-10">
-      {children}
+        {children}
       </span>
       
       {/* Shimmer effect */}
