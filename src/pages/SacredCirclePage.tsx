@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Search, Heart } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { useAuth } from '../context/AuthContext';
 import { useChakra } from '../context/ChakraContext';
 import { supabase } from '../lib/supabase';
 import { Circle } from '../types';
 import { motion } from 'framer-motion';
+import { Users, Grid, Activity, MessageSquare, Calendar } from 'lucide-react';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
+import FloatingFormulas from '../components/ui/FloatingFormulas';
+
+// Import Sacred Circle components
+import CircleRings from '../components/circles/CircleRings';
+import TimelineTotem from '../components/circles/TimelineTotem';
+import SigilPingSystem from '../components/circles/SigilPingSystem';
+import RitualSyncBeacon from '../components/circles/RitualSyncBeacon';
+import SoulCallBroadcast from '../components/circles/SoulCallBroadcast';
+import SacredLeaderboard from '../components/circles/SacredLeaderboard';
+import MessageScrolls from '../components/circles/MessageScrolls';
+import RitualLogDisplay from '../components/circles/RitualLogDisplay';
+import CircleMetrics from '../components/circles/CircleMetrics';
+
+// Import placeholder data
+import { circleMembersData } from '../data/sacredCircleData';
 
 const SacredCirclePage: React.FC = () => {
   const { user } = useAuth();
@@ -18,14 +34,9 @@ const SacredCirclePage: React.FC = () => {
   const [myCircles, setMyCircles] = useState<Circle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingCircle, setIsCreatingCircle] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Form states
-  const [newCircleName, setNewCircleName] = useState('');
-  const [newCircleDescription, setNewCircleDescription] = useState('');
-  const [newCircleImageUrl, setNewCircleImageUrl] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('community');
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'rings' | 'totems'>('rings');
   
   useEffect(() => {
     if (user) {
@@ -96,117 +107,44 @@ const SacredCirclePage: React.FC = () => {
     }
   };
   
-  const handleCreateCircle = async () => {
-    if (!user) return;
-    
-    try {
-      setIsSubmitting(true);
-      setErrorMessage(null);
-      
-      if (!newCircleName.trim()) {
-        setErrorMessage('Please enter a name for your circle');
-        return;
-      }
-      
-      const { data: circle, error } = await supabase
-        .from('circles')
-        .insert([
-          {
-            name: newCircleName.trim(),
-            description: newCircleDescription.trim() || null,
-            image_url: newCircleImageUrl.trim() || null,
-            creator_id: user.id,
-            love_level: 0
-          }
-        ])
-        .select()
-        .single();
-        
-      if (error) throw error;
-      
-      // Add creator as a member with 'creator' role
-      const { error: memberError } = await supabase
-        .from('circle_members')
-        .insert([
-          {
-            circle_id: circle.id,
-            user_id: user.id,
-            role: 'creator'
-          }
-        ]);
-        
-      if (memberError) throw memberError;
-      
-      // Reset form
-      setNewCircleName('');
-      setNewCircleDescription('');
-      setNewCircleImageUrl('');
-      setIsCreatingCircle(false);
-      
-      // Update circles list
-      setMyCircles([circle, ...myCircles]);
-      
-      // Navigate to the new circle
-      navigate(`/sacred-circle/${circle.id}`);
-      
-    } catch (error) {
-      console.error('Error creating circle:', error);
-      setErrorMessage('Failed to create circle. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleMemberSelect = (memberId: string) => {
+    setSelectedMember(memberId);
+    // In a real app, you would fetch member details and show a profile modal
+    console.log('Selected member:', memberId);
   };
   
-  const handleJoinCircle = async (circleId: string) => {
-    if (!user) return;
-    
-    try {
-      // Check if already a member
-      const { data: existingMember, error: checkError } = await supabase
-        .from('circle_members')
-        .select('*')
-        .eq('circle_id', circleId)
-        .eq('user_id', user.id);
-        
-      if (checkError) throw checkError;
-      
-      if (existingMember && existingMember.length > 0) {
-        // Already a member, navigate to circle
-        navigate(`/sacred-circle/${circleId}`);
-        return;
-      }
-      
-      // Add as a member
-      const { error: joinError } = await supabase
-        .from('circle_members')
-        .insert([
-          {
-            circle_id: circleId,
-            user_id: user.id,
-            role: 'member'
-          }
-        ]);
-        
-      if (joinError) throw joinError;
-      
-      // Navigate to the circle
-      navigate(`/sacred-circle/${circleId}`);
-      
-    } catch (error) {
-      console.error('Error joining circle:', error);
-      alert('Failed to join circle. Please try again.');
-    }
+  const handlePingSigil = (sigilId: string) => {
+    // In a real app, you would broadcast the sigil to all members
+    console.log('Pinged sigil:', sigilId);
   };
   
-  const filteredCircles = searchQuery.trim() 
-    ? circles.filter(circle => 
-        circle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (circle.description && circle.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : circles;
+  const handleScheduleRitual = (ritualId: string, date: string, intention: string) => {
+    // In a real app, you would create a ritual and notify members
+    console.log('Scheduled ritual:', ritualId, date, intention);
+  };
+  
+  const handleSoulCall = (message: string, chakra: string) => {
+    // In a real app, you would broadcast the soul call to all members
+    console.log('Soul call broadcast:', message, chakra);
+  };
+  
+  const handleSendMessage = (message: string, emojiIntent: string, sigilId?: string) => {
+    // In a real app, you would send the message to the circle
+    console.log('Sent message:', message, emojiIntent, sigilId);
+  };
+  
+  const handleRitualSelect = (ritualId: string) => {
+    // In a real app, you would show ritual details
+    console.log('Selected ritual:', ritualId);
+  };
+  
+  // Get selected member
+  const getSelectedMember = () => {
+    return circleMembersData.find(m => m.id === selectedMember);
+  };
   
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <SacredHeading 
           as="h1" 
@@ -214,284 +152,217 @@ const SacredCirclePage: React.FC = () => {
           chakraColor={chakraState.color}
           withGlow
         >
-          Sacred Circles
+          Sacred Circle
         </SacredHeading>
         
-        <TattooButton
-          onClick={() => setIsCreatingCircle(true)}
-          chakraColor={chakraState.color}
-          className="flex items-center"
-        >
-          <Plus size={18} className="mr-1" />
-          Create Circle
-        </TattooButton>
-      </div>
-      
-      {isCreatingCircle && (
-        <motion.div 
-          className="bg-dark-200 p-6 rounded-2xl shadow-chakra-glow border border-dark-300 mb-6"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <SacredHeading 
-              as="h2" 
-              className="text-xl"
-              chakraColor={chakraState.color}
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center bg-dark-300 rounded-full p-1">
+            <button
+              onClick={() => setViewMode('rings')}
+              className={`px-3 py-1 rounded-full text-sm ${
+                viewMode === 'rings' 
+                  ? 'bg-dark-200 text-white' 
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
             >
-              Create New Circle
-            </SacredHeading>
-            <button 
-              onClick={() => setIsCreatingCircle(false)}
-              className="text-gray-400 hover:text-gray-200"
+              <Grid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('totems')}
+              className={`px-3 py-1 rounded-full text-sm ${
+                viewMode === 'totems' 
+                  ? 'bg-dark-200 text-white' 
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
             >
-              ✕
+              <Activity size={16} />
             </button>
           </div>
           
-          {errorMessage && (
-            <div className="mb-4 p-3 bg-red-900 text-red-100 rounded-md">
-              {errorMessage}
-            </div>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Circle Name
-              </label>
-              <input
-                type="text"
-                value={newCircleName}
-                onChange={(e) => setNewCircleName(e.target.value)}
-                className="w-full px-4 py-2 bg-dark-300 border border-dark-400 rounded-md focus:outline-none focus:ring-2"
-                style={{ focusRingColor: chakraState.color }}
-                placeholder="e.g., Heart Chakra Healers"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Description
-              </label>
-              <textarea
-                rows={3}
-                value={newCircleDescription}
-                onChange={(e) => setNewCircleDescription(e.target.value)}
-                className="w-full px-4 py-2 bg-dark-300 border border-dark-400 rounded-md focus:outline-none focus:ring-2"
-                style={{ focusRingColor: chakraState.color }}
-                placeholder="Describe the purpose of your sacred circle..."
-              ></textarea>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Circle Image URL (Optional)
-              </label>
-              <input
-                type="text"
-                value={newCircleImageUrl}
-                onChange={(e) => setNewCircleImageUrl(e.target.value)}
-                className="w-full px-4 py-2 bg-dark-300 border border-dark-400 rounded-md focus:outline-none focus:ring-2"
-                style={{ focusRingColor: chakraState.color }}
-                placeholder="https://example.com/image.jpg"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Enter a URL for your circle image
-              </p>
-            </div>
-            
-            <div className="flex justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsCreatingCircle(false)}
-                className="px-4 py-2 border border-gray-500 text-gray-300 rounded-2xl hover:bg-dark-300"
-              >
-                Cancel
-              </button>
-              
-              <TattooButton
-                onClick={handleCreateCircle}
-                disabled={isSubmitting || !newCircleName.trim()}
-                chakraColor={chakraState.color}
-              >
-                {isSubmitting ? (
-                  <>
-                    <motion.span 
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      className="inline-block mr-2"
-                    >
-                      ⟳
-                    </motion.span>
-                    Creating...
-                  </>
-                ) : 'Create Circle'}
-              </TattooButton>
-            </div>
-          </div>
-        </motion.div>
-      )}
-      
-      {/* My Circles Section */}
-      <div className="mb-10">
-        <div className="flex items-center mb-4">
-          <Users size={20} className="mr-2 text-gray-400" />
-          <SacredHeading 
-            as="h2" 
-            className="text-xl"
-            chakraColor={chakraState.color}
-          >
-            My Sacred Circles
-          </SacredHeading>
-        </div>
-        
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-          </div>
-        ) : myCircles.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myCircles.map((circle) => (
-              <CircleCard 
-                key={circle.id} 
-                circle={circle} 
-                onJoin={() => navigate(`/sacred-circle/${circle.id}`)} 
-                isMember={true}
-                chakraColor={chakraState.color}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-dark-200 p-6 rounded-2xl text-center">
-            <p className="text-gray-400 mb-4">You haven't joined any sacred circles yet.</p>
-            <TattooButton
-              onClick={() => setIsCreatingCircle(true)}
-              chakraColor={chakraState.color}
-              variant="outline"
-              size="sm"
-            >
-              Create Your First Circle
-            </TattooButton>
-          </div>
-        )}
-      </div>
-      
-      {/* Discover Circles Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <SacredHeading 
-            as="h2" 
-            className="text-xl"
-            chakraColor={chakraState.color}
-          >
-            Discover Sacred Circles
-          </SacredHeading>
-          
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search circles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-dark-300 border border-dark-400 rounded-full text-sm focus:outline-none focus:ring-2"
-              style={{ focusRingColor: chakraState.color }}
-            />
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
-          </div>
-        </div>
-        
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-          </div>
-        ) : filteredCircles.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCircles.map((circle) => (
-              <CircleCard 
-                key={circle.id} 
-                circle={circle}
-                onJoin={() => handleJoinCircle(circle.id)}
-                isMember={myCircles.some(c => c.id === circle.id)}
-                chakraColor={chakraState.color}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-dark-200 p-6 rounded-2xl text-center">
-            <p className="text-gray-400">
-              {searchQuery ? 'No circles match your search.' : 'No circles available for discovery.'}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface CircleCardProps {
-  circle: Circle;
-  onJoin: () => void;
-  isMember: boolean;
-  chakraColor: string;
-}
-
-const CircleCard: React.FC<CircleCardProps> = ({ 
-  circle, 
-  onJoin, 
-  isMember,
-  chakraColor
-}) => {
-  return (
-    <motion.div 
-      className="bg-dark-200 rounded-2xl shadow-md overflow-hidden border border-dark-300"
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
-    >
-      <div className="h-32 bg-gradient-to-b from-dark-100 to-dark-300 relative">
-        {circle.image_url ? (
-          <img 
-            src={circle.image_url} 
-            alt={circle.name} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div 
-            className="absolute inset-0 sacred-geometry-bg opacity-30"
-            style={{ 
-              background: `radial-gradient(circle at center, ${chakraColor}40, transparent), var(--bg-image)` 
-            }}
-          ></div>
-        )}
-      </div>
-      
-      <div className="p-4">
-        <h3 className="text-lg font-semibold mb-1">{circle.name}</h3>
-        
-        {circle.description && (
-          <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-            {circle.description}
-          </p>
-        )}
-        
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Heart size={16} className="mr-1 text-pink-500" />
-            <span className="text-sm text-gray-400">{circle.love_level || 0}</span>
-          </div>
-          
           <TattooButton
-            onClick={onJoin}
-            chakraColor={chakraColor}
-            variant={isMember ? "outline" : "primary"}
-            size="sm"
+            onClick={() => setIsCreatingCircle(true)}
+            chakraColor={chakraState.color}
+            className="flex items-center"
           >
-            {isMember ? 'Enter Circle' : 'Join Circle'}
+            <Users size={18} className="mr-1" />
+            My Circles
           </TattooButton>
         </div>
       </div>
-    </motion.div>
+      
+      <Tabs
+        defaultValue="community"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <div className="border-b border-dark-300 mb-6">
+          <TabsList className="flex">
+            <TabsTrigger 
+              value="community"
+              className="flex items-center px-4 py-2 text-gray-400 border-b-2 border-transparent"
+              activeClassName="text-white border-current"
+              style={{ borderColor: activeTab === 'community' ? chakraState.color : 'transparent' }}
+            >
+              <Users size={18} className="mr-2" />
+              Community
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rituals"
+              className="flex items-center px-4 py-2 text-gray-400 border-b-2 border-transparent"
+              activeClassName="text-white border-current"
+              style={{ borderColor: activeTab === 'rituals' ? chakraState.color : 'transparent' }}
+            >
+              <Calendar size={18} className="mr-2" />
+              Rituals
+            </TabsTrigger>
+            <TabsTrigger 
+              value="messages"
+              className="flex items-center px-4 py-2 text-gray-400 border-b-2 border-transparent"
+              activeClassName="text-white border-current"
+              style={{ borderColor: activeTab === 'messages' ? chakraState.color : 'transparent' }}
+            >
+              <MessageSquare size={18} className="mr-2" />
+              Messages
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        
+        <TabsContent value="community" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main visualization area */}
+            <div className="lg:col-span-2 bg-dark-200 p-4 rounded-2xl border border-dark-300 relative overflow-hidden">
+              <div className="absolute inset-0 pointer-events-none opacity-20">
+                <FloatingFormulas density="low" />
+              </div>
+              
+              {viewMode === 'rings' ? (
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-4">Chakra-Based Circle Rings</h3>
+                  <CircleRings onMemberSelect={handleMemberSelect} />
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-4">Timeline Totem Poles</h3>
+                  <div className="flex justify-around">
+                    <TimelineTotem timeline="past" onMemberSelect={handleMemberSelect} />
+                    <TimelineTotem timeline="present" onMemberSelect={handleMemberSelect} />
+                    <TimelineTotem timeline="future" onMemberSelect={handleMemberSelect} />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Right sidebar */}
+            <div className="space-y-6">
+              {selectedMember ? (
+                <motion.div
+                  className="bg-dark-200 p-4 rounded-2xl border border-dark-300"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-medium text-white">Member Profile</h3>
+                    <button
+                      onClick={() => setSelectedMember(null)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center mb-4">
+                    <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                      <img 
+                        src={getSelectedMember()?.avatarUrl} 
+                        alt={getSelectedMember()?.displayName} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    <div>
+                      <div className="text-xl font-medium text-white">{getSelectedMember()?.displayName}</div>
+                      <div className="text-gray-400">{getSelectedMember()?.soulName}</div>
+                      <div className="mt-1 flex items-center">
+                        <ChakraBadge chakra={getSelectedMember()?.primaryChakra || 'Heart'} size="sm" />
+                        <span className="ml-2 text-xs text-gray-400">Level {getSelectedMember()?.xpLevel}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="p-3 rounded-lg mb-4"
+                    style={{ 
+                      backgroundColor: getSelectedMember()?.timelineAlignment === 'past' ? '#C6282820' : 
+                                      getSelectedMember()?.timelineAlignment === 'present' ? '#66BB6A20' : 
+                                      '#AB47BC20',
+                      color: getSelectedMember()?.timelineAlignment === 'past' ? '#C62828' : 
+                            getSelectedMember()?.timelineAlignment === 'present' ? '#66BB6A' : 
+                            '#AB47BC'
+                    }}
+                  >
+                    <div className="text-sm">
+                      {getSelectedMember()?.timelineAlignment.charAt(0).toUpperCase() + 
+                       getSelectedMember()?.timelineAlignment.slice(1)} Timeline Alignment
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="text-sm text-gray-400 mb-1">Status Message</div>
+                    <div className="p-3 rounded-lg bg-dark-300 text-gray-200">
+                      "{getSelectedMember()?.statusMessage}"
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <TattooButton
+                      chakraColor={chakraState.color}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Send Message
+                    </TattooButton>
+                    
+                    <TattooButton
+                      chakraColor={chakraState.color}
+                      size="sm"
+                    >
+                      Invite to Ritual
+                    </TattooButton>
+                  </div>
+                </motion.div>
+              ) : (
+                <>
+                  <SigilPingSystem onPingSigil={handlePingSigil} />
+                  <SoulCallBroadcast onBroadcast={handleSoulCall} />
+                </>
+              )}
+              
+              <CircleMetrics />
+            </div>
+          </div>
+          
+          <SacredLeaderboard onMemberSelect={handleMemberSelect} />
+        </TabsContent>
+        
+        <TabsContent value="rituals" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <RitualLogDisplay onRitualSelect={handleRitualSelect} />
+            </div>
+            
+            <div>
+              <RitualSyncBeacon onScheduleRitual={handleScheduleRitual} />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="messages">
+          <MessageScrolls onSendMessage={handleSendMessage} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
