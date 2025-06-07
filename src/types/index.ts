@@ -179,3 +179,55 @@ export interface LoveNote {
   created_at: string;
   user?: UserProfile;
 }
+
+// Echo Compass Codex types
+export interface TimelineNode {
+  id: string;
+  name: string;
+  description: string;
+  chakra: ChakraType;
+  x: number;
+  y: number;
+  color: string;
+}
+
+export interface CodexEntry {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  type: string;
+  chakra: ChakraType;
+  tags?: string[];
+  created_at: string;
+}
+
+export interface UniversalLaw {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface ResonanceScore {
+  overall: number;
+  chakraHarmony: number;
+  frequencyAlignment: number;
+  timelineAlignment: number;
+  universalLawCompliance: number;
+}
+
+export type SigilEvolutionStage = 'seed' | 'sprout' | 'bloom' | 'mature' | 'transcendent';
+
+export interface SigilAlignment {
+  sigil_id: string;
+  timeline_node_id: string;
+  alignment_date: string;
+}
+
+export interface QuantumField {
+  resonance: number;
+  stability: number;
+  chakraInfluence: ChakraType;
+  dominantFrequency: number;
+  activeLaws: string[];
+}
