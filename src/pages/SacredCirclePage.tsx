@@ -29,7 +29,7 @@ import SoulThreadViewer from '../components/circles/SoulThreadViewer';
 import CircleModeration from '../components/circles/CircleModeration';
 
 // Import placeholder data
-import { circleMembersData } from '../data/sacredCircleData';
+import { circleMembersData, sharedSigilBoardData } from '../data/sacredCircleData';
 
 const SacredCirclePage: React.FC = () => {
   const { user } = useAuth();
