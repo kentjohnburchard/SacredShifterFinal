@@ -217,13 +217,19 @@
 .os-dock {
   background: rgba(10, 10, 18, 0.7);
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(58, 58, 72, 0.3);
+  border: 1px solid rgba(58, 58, 72, 0.5);
   border-radius: 1rem;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px var(--chakra-color, rgba(157, 78, 221, 0.3));
+  transition: box-shadow 0.3s ease;
+}
+
+.os-dock.collapsed {
+  padding: 0.5rem;
+  border-radius: 0.75rem;
 }
 
 .os-dock-item {
@@ -250,6 +256,16 @@
   box-shadow: 0 0 15px rgba(var(--chakra-color), 0.4);
 }
 
+.os-dock-item.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 15px var(--chakra-color);
+  opacity: 0;
+  animation: dock-item-pulse 3s infinite;
+}
+
 .os-dock-item.active::after {
   content: '';
   position: absolute;
@@ -260,6 +276,46 @@
   height: 0.25rem;
   border-radius: 50%;
   background-color: var(--chakra-color);
+}
+
+@keyframes dock-item-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+/* Anchor point styles */
+.anchor-point {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  pointer-events: none;
+}
+
+.anchor-point::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.3;
+}
+
+.anchor-point::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px dashed currentColor;
+  opacity: 0.2;
+  animation: rotate 9s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Floating window styles */
