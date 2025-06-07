@@ -95,6 +95,8 @@ const OSDock: React.FC = () => {
   
   // Create anchor points based on window size and chakras
   const [anchorPoints, setAnchorPoints] = useState<AnchorPoint[]>([]);
+  // Add a recovery mechanism to ensure the dock is always visible
+  const [isVisible, setIsVisible] = useState(true);
   
   useEffect(() => {
     // Create anchor points based on window dimensions
@@ -123,7 +125,21 @@ const OSDock: React.FC = () => {
     
     // Update anchor points when window is resized
     window.addEventListener('resize', createAnchorPoints);
-    return () => window.removeEventListener('resize', createAnchorPoints);
+    
+    // Add recovery mechanism - if dock disappears, reset its position
+    const recoveryInterval = setInterval(() => {
+      if (!isVisible) {
+        console.log("Recovering lost dock...");
+        setPosition({ x: 20, y: window.innerHeight / 2 });
+        setIsVisible(true);
+        setIsCollapsed(false);
+      }
+    }, 3000);
+    
+    return () => {
+      window.removeEventListener('resize', createAnchorPoints);
+      clearInterval(recoveryInterval);
+    };
   }, []);
   
   const isActive = (path: string) => {
@@ -266,6 +282,23 @@ const OSDock: React.FC = () => {
         />
       )}
       
+      {/* Emergency recovery button - always visible */}
+      <div 
+        className="fixed bottom-4 right-4 z-[100] p-2 rounded-full bg-dark-200 border border-dark-300 cursor-pointer"
+        onClick={() => {
+          setPosition({ x: 20, y: window.innerHeight / 2 });
+          setIsVisible(true);
+          setIsCollapsed(false);
+        }}
+        title="Recover OS Dock"
+        style={{ 
+          boxShadow: `0 0 10px ${chakraState.color}40`,
+          opacity: isVisible ? 0 : 0.8
+        }}
+      >
+        <Compass size={20} style={{ color: chakraState.color }} />
+      </div>
+      
       <motion.div 
         className={`os-dock fixed z-50 ${isCollapsed ? 'collapsed' : ''}`}
         style={{ 
@@ -320,6 +353,8 @@ const OSDock: React.FC = () => {
         variants={dockVariants}
         initial="hidden"
         animate={isCollapsed ? "collapsed" : "visible"}
+       onAnimationStart={() => setIsVisible(true)}
+       onAnimationComplete={() => setIsVisible(true)}
       >
         {/* Dock header with controls */}
         <div className="flex items-center justify-between w-full px-1 mb-1">
@@ -349,6 +384,10 @@ const OSDock: React.FC = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               title={isCollapsed ? "Expand dock" : "Collapse dock"}
+             onClickCapture={(e) => {
+               e.stopPropagation(); // Prevent event bubbling
+               setIsCollapsed(!isCollapsed);
+             }}
             >
               {isCollapsed ? <Maximize size={10} /> : <Minimize size={10} />}
             </motion.button>
@@ -378,6 +417,7 @@ const OSDock: React.FC = () => {
               whileTap={{ scale: 0.9 }}
               title="Move left"
               onClick={() => {
+               // Ensure we don't move off-screen
                 setPosition({
                   x: Math.max(20, position.x - 50),
                   y: position.y
@@ -393,6 +433,7 @@ const OSDock: React.FC = () => {
               whileTap={{ scale: 0.9 }}
               title="Move right"
               onClick={() => {
+               // Ensure we don't move off-screen
                 setPosition({
                   x: Math.min(window.innerWidth - 80, position.x + 50),
                   y: position.y
@@ -539,6 +580,7 @@ const OSDock: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
+           onClick={() => setIsCollapsed(false)}
           >
             <motion.div
               className="w-8 h-8 rounded-full flex items-center justify-center"
