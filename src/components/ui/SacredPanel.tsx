@@ -77,7 +77,7 @@ const SacredPanel: React.FC<SacredPanelProps> = ({
         <div className="window-header">
           <div className="flex items-center">
             {glyphSymbol && (
-              <span className="mr-2 font-mystical text-lg" style={{ color: chakraState.color }}>
+              <span className="mr-2 font-mystical text-lg\" style={{ color: chakraState.color }}>
                 {glyphSymbol}
               </span>
             )}
