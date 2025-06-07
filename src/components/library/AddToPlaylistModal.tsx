@@ -5,7 +5,7 @@ import { useChakra } from '../../context/ChakraContext';
 import { supabase } from '../../lib/supabase';
 import { LibraryItem, LibraryPlaylist } from '../../types';
 import { X, Plus, Check, Music } from 'lucide-react';
-import TattooButton from '../components/ui/TattooButton';
+import TattooButton from '../ui/TattooButton';
 
 interface AddToPlaylistModalProps {
   item: LibraryItem;
