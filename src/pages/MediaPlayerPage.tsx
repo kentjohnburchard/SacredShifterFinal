@@ -312,8 +312,8 @@ const MediaPlayerPage: React.FC = () => {
       content: [
         'This meditation completely shifted my energy field. I felt the frequencies resonating with my crown chakra!',
         'The Tesla 369 code embedded in this content is powerful. My manifestations are accelerating.',
-        'I've been using this daily for a week and my third eye activation is noticeable. Thank you for sharing this wisdom.',
-        'The ancestral healing in this recording helped me release patterns I've been carrying for lifetimes.',
+        'I\'ve been using this daily for a week and my third eye activation is noticeable. Thank you for sharing this wisdom.',
+        'The ancestral healing in this recording helped me release patterns I\'ve been carrying for lifetimes.',
         'Beautiful frequencies. I can feel my DNA restructuring with each listen.'
       ][i],
       created_at: new Date(Date.now() - i * 3600000).toISOString(),

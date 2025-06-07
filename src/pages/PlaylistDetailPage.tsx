@@ -5,7 +5,7 @@ import { useChakra } from '../context/ChakraContext';
 import { supabase } from '../lib/supabase';
 import { LibraryPlaylist, LibraryItem, PlaylistItem } from '../types';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Edit, Share, Trash2, Play, Music, Video, FileText, Image, BookOpen, DragVertical, X, Heart, Eye } from 'lucide-react';
+import { ArrowLeft, Edit, Share, Trash2, Play, Music, Video, FileText, Image, BookOpen, FlipVertical as DragVertical, X, Heart, Eye } from 'lucide-react';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 
