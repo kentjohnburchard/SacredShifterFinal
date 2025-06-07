@@ -854,3 +854,5 @@ const Pause: React.FC<{ size: number; className?: string }> = ({ size, className
 };
 
 export default MediaPlayerPage;
+
+export default MediaPlayerPage
