@@ -112,7 +112,7 @@ const MessageScrolls: React.FC<MessageScrollsProps> = ({
                 }}
               >
                 {!isCurrentUser && (
-                  <div className="text-xs font-medium mb-1" style={{ color: getTimelineColor(msg.timelineVibe) }}>
+                  <div className="text-xs font-medium mb-1\" style={{ color: getTimelineColor(msg.timelineVibe) }}>
                     {sender?.displayName || 'Unknown'}
                   </div>
                 )}
