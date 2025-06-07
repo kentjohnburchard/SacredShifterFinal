@@ -326,7 +326,7 @@ export const messageScrollsData: MessageScroll[] = [
     messageId: 'msg-003',
     senderId: '6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u',
     timestamp: '2025-06-06T14:28:45Z',
-    text: 'Who wants to join me for a Heart Resonance session at 8pm? I've prepared a new sigil for collective amplification.',
+    text: 'Who wants to join me for a Heart Resonance session at 8pm? I\'ve prepared a new sigil for collective amplification.',
     emojiIntent: '💗',
     sigilAttached: 'sigil-006',
     timelineVibe: 'future'
@@ -335,7 +335,7 @@ export const messageScrollsData: MessageScroll[] = [
     messageId: 'msg-004',
     senderId: '2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q',
     timestamp: '2025-06-06T14:30:12Z',
-    text: 'I'll be there. My Solar Plexus is aligned and ready to contribute.',
+    text: 'I\'ll be there. My Solar Plexus is aligned and ready to contribute.',
     emojiIntent: '🔥',
     timelineVibe: 'present'
   },
@@ -343,7 +343,7 @@ export const messageScrollsData: MessageScroll[] = [
     messageId: 'msg-005',
     senderId: '5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t',
     timestamp: '2025-06-06T14:32:50Z',
-    text: 'Has anyone worked with ancestral timeline nodes? I'm trying to integrate some wisdom from my Root work.',
+    text: 'Has anyone worked with ancestral timeline nodes? I\'m trying to integrate some wisdom from my Root work.',
     emojiIntent: '🌱',
     timelineVibe: 'past'
   },
@@ -359,7 +359,7 @@ export const messageScrollsData: MessageScroll[] = [
     messageId: 'msg-007',
     senderId: '7g8h9i0j-1k2l-3m4n-5o6p-7q8r9s0t1u2v',
     timestamp: '2025-06-06T14:38:05Z',
-    text: 'Just created a new sigil with 369 Tesla frequencies. It's still in seed stage but already pulsing strongly.',
+    text: 'Just created a new sigil with 369 Tesla frequencies. It\'s still in seed stage but already pulsing strongly.',
     emojiIntent: '🌀',
     sigilAttached: 'sigil-007',
     timelineVibe: 'present'
