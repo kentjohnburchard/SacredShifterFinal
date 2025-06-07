@@ -108,6 +108,8 @@ const Sidebar: React.FC = () => {
             <NavItem icon={<Book size={20} />} to="/the-empress" label="The Empress" isActive={isActive('/the-empress')} index={12} />
             <NavItem icon={<Users size={20} />} to="/sacred-circle" label="Sacred Circle" isActive={location.pathname.startsWith('/sacred-circle')} index={13} />
             <NavItem icon={<BarChart2 size={20} />} to="/blueprint" label="Soul Blueprint" isActive={isActive('/blueprint')} index={14} />
+            <NavItem icon={<BookOpen size={20} />} to="/sacred-library" label="Sacred Library" isActive={location.pathname.startsWith('/sacred-library')} index={15} />
+            <NavItem icon={<Music size={20} />} to="/sacred-library/playlists" label="Sacred Playlists" isActive={location.pathname.startsWith('/sacred-library/playlists')} index={16} />
 
           </motion.div>
         </div>
