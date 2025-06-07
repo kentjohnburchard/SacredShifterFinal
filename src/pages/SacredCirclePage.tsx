@@ -10,7 +10,7 @@ import { Users, Grid, Activity, MessageSquare, Calendar, Plus, Settings, Zap, Co
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 import FloatingFormulas from '../components/ui/FloatingFormulas';
-import { ChakraBadge } from '../components/chakra/ChakraBadge';
+import ChakraBadge from '../components/chakra/ChakraBadge';
 
 // Import Sacred Circle components
 import CircleRings from '../components/circles/CircleRings';
