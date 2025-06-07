@@ -9,6 +9,7 @@ import { ArrowLeft, Upload, X, Music, Video, FileText, Image, BookOpen, Info, Al
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 import ChakraSelector from '../components/ui/ChakraSelector';
+import FloatingFormulas from '../components/ui/FloatingFormulas';
 
 const UploadPage: React.FC = () => {
   const { user } = useAuth();
@@ -34,6 +35,7 @@ const UploadPage: React.FC = () => {
   const [frequency, setFrequency] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [ritualLink, setRitualLink] = useState<string>('');
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -114,7 +116,39 @@ const UploadPage: React.FC = () => {
         });
       }, 200);
       
-      // In a real app, use the uploadToLibrary utility
+      // In a real app, this would upload to Supabase Storage
+      // const filePath = `sacred-library/${user.id}/${Date.now()}_${selectedFile.name}`;
+      // const { data, error } = await supabase.storage
+      //   .from('sacred-library')
+      //   .upload(filePath, selectedFile, {
+      //     cacheControl: '3600',
+      //     upsert: false
+      //   });
+      
+      // if (error) throw error;
+      
+      // Then create a record in the sacred_library_items table
+      // const { data: itemData, error: itemError } = await supabase
+      //   .from('sacred_library_items')
+      //   .insert([
+      //     {
+      //       title,
+      //       description,
+      //       file_url: filePath,
+      //       creator_id: user.id,
+      //       chakra,
+      //       timeline,
+      //       frequency_hz: frequency ? parseInt(frequency) : null,
+      //       tags,
+      //       media_type: mediaType,
+      //       is_locked: false
+      //     }
+      //   ])
+      //   .select()
+      //   .single();
+      
+      // if (itemError) throw itemError;
+      
       // For demo, simulate upload delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -124,10 +158,10 @@ const UploadPage: React.FC = () => {
       
       // Determine if this should go to moderation
       if (showModeration) {
-        // In a real app, insert into library_upload_requests
+        // In a real app, insert into sacred_library_upload_requests
         setSuccess('Your upload has been submitted for moderation. You will be notified when it is approved.');
       } else {
-        // In a real app, insert into library_items
+        // In a real app, insert into sacred_library_items
         setSuccess('Your content has been successfully uploaded to the Sacred Library!');
       }
       
@@ -143,6 +177,7 @@ const UploadPage: React.FC = () => {
         setFrequency('');
         setTags([]);
         setTagInput('');
+        setRitualLink('');
         setUploadProgress(0);
         setIsUploading(false);
         setSuccess(null);
@@ -168,6 +203,11 @@ const UploadPage: React.FC = () => {
       case 'text': return <BookOpen size={24} />;
       default: return <BookOpen size={24} />;
     }
+  };
+  
+  // Check if frequency is a Tesla number (3, 6, 9)
+  const isTeslaNumber = (frequency: string): boolean => {
+    return frequency.includes('3') || frequency.includes('6') || frequency.includes('9');
   };
   
   return (
@@ -217,9 +257,14 @@ const UploadPage: React.FC = () => {
         </motion.div>
       )}
       
-      <div className="bg-dark-200 p-6 rounded-2xl border border-dark-300">
+      <div className="bg-dark-200 p-6 rounded-2xl border border-dark-300 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0 pointer-events-none opacity-10">
+          <FloatingFormulas density="low" />
+        </div>
+        
         {/* File upload area */}
-        <div className="mb-6">
+        <div className="mb-6 relative z-10">
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Select File
           </label>
@@ -280,7 +325,7 @@ const UploadPage: React.FC = () => {
         </div>
         
         {/* Form fields */}
-        <div className="space-y-6">
+        <div className="space-y-6 relative z-10">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Title
@@ -395,7 +440,7 @@ const UploadPage: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Frequency (Hz)
+              Tesla Frequency (Hz)
             </label>
             <div className="grid grid-cols-7 gap-2">
               {[396, 417, 528, 639, 741, 852, 963].map((freq) => (
@@ -431,7 +476,56 @@ const UploadPage: React.FC = () => {
                 style={{ focusRingColor: chakraState.color }}
                 placeholder="Custom frequency (Hz)"
               />
+              
+              {frequency && isTeslaNumber(frequency) && (
+                <motion.div 
+                  className="mt-2 text-sm px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: `${chakraState.color}20`,
+                    color: chakraState.color
+                  }}
+                  animate={{ 
+                    boxShadow: [
+                      `0 0 3px ${chakraState.color}`,
+                      `0 0 6px ${chakraState.color}`,
+                      `0 0 9px ${chakraState.color}`
+                    ]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                >
+                  Tesla 3-6-9 frequency detected! This will enhance resonance.
+                </motion.div>
+              )}
             </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Ritual Link (Optional)
+            </label>
+            <select
+              value={ritualLink}
+              onChange={(e) => setRitualLink(e.target.value)}
+              className="w-full px-3 py-2 bg-dark-300 border border-dark-400 rounded-md text-white focus:outline-none focus:ring-2"
+              style={{ focusRingColor: chakraState.color }}
+            >
+              <option value="">No ritual required</option>
+              <option value="the-fool">The Fool Journey</option>
+              <option value="the-high-priestess">High Priestess Journey</option>
+              <option value="the-empress">The Empress Journey</option>
+              <option value="the-hierophant">The Hierophant Journey</option>
+              <option value="heart-resonance">Heart Resonance Ritual</option>
+            </select>
+            
+            {ritualLink && (
+              <div className="mt-2 text-sm text-gray-400">
+                This content will be locked until the user completes the selected ritual.
+              </div>
+            )}
           </div>
           
           <div>

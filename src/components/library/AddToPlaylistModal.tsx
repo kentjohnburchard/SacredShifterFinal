@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useChakra } from '../../context/ChakraContext';
 import { supabase } from '../../lib/supabase';
 import { LibraryItem, LibraryPlaylist } from '../../types';
 import { X, Plus, Check, Music } from 'lucide-react';
-import TattooButton from '../ui/TattooButton';
+import TattooButton from '../components/ui/TattooButton';
 
 interface AddToPlaylistModalProps {
   item: LibraryItem;
@@ -241,21 +241,20 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
                   </div>
                   
                   <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setShowCreateForm(false)}
-                      className="px-3 py-1.5 text-sm text-gray-300 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    
                     <TattooButton
                       onClick={handleCreatePlaylist}
                       disabled={!newPlaylistName.trim() || isSubmitting}
                       chakraColor={chakraState.color}
                       size="sm"
                     >
-                      Create
+                      {isSubmitting ? 'Creating...' : 'Create'}
                     </TattooButton>
+                    <button
+                      onClick={() => setShowCreateForm(false)}
+                      className="px-3 py-1.5 bg-dark-400 text-gray-300 rounded-md text-sm"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               )}
