@@ -418,7 +418,7 @@ const PlaylistDetailPage: React.FC = () => {
                 className="w-full mt-4 flex items-center justify-center"
                 disabled={playlistItems.length === 0}
               >
-                <Play size={16} className="mr-1" />
+                <PlayIcon size={16} className="mr-1" />
                 Play All
               </TattooButton>
               
@@ -462,7 +462,7 @@ const PlaylistDetailPage: React.FC = () => {
                     >
                       {isOwner && (
                         <div className="flex-shrink-0 mr-2 cursor-move text-gray-500">
-                          <DragVertical size={16} />
+                          <DragVerticalIcon size={16} />
                         </div>
                       )}
                       
@@ -472,13 +472,13 @@ const PlaylistDetailPage: React.FC = () => {
                             onClick={() => handlePlayItem(playlistItem.item_id)}
                             className="text-white"
                           >
-                            <Pause size={16} />
+                            <PauseIcon size={16} />
                           </button>
                         ) : (
                           <button
                             onClick={() => handlePlayItem(playlistItem.item_id)}
                           >
-                            <Play size={16} />
+                            <PlayIcon size={16} />
                           </button>
                         )}
                       </div>
@@ -585,7 +585,7 @@ const getChakraColor = (chakra?: string): string => {
 };
 
 // Play icon component
-const Play: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
+const PlayIcon: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     width={size} 
@@ -603,7 +603,7 @@ const Play: React.FC<{ size: number; className?: string }> = ({ size, className 
 );
 
 // Pause icon component
-const Pause: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
+const PauseIcon: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     width={size} 
@@ -622,7 +622,7 @@ const Pause: React.FC<{ size: number; className?: string }> = ({ size, className
 );
 
 // Drag vertical icon component
-const DragVertical: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
+const DragVerticalIcon: React.FC<{ size: number; className?: string }> = ({ size, className }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     width={size} 
