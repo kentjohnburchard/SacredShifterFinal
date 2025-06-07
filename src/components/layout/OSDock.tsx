@@ -72,7 +72,7 @@ const OSDock: React.FC = () => {
   const location = useLocation();
   const { chakraState } = useChakra();
   const dragControls = useDragControls();
-  const [position, setPosition] = React.useState({ x: 20, y: '50%' });
+  const [position, setPosition] = React.useState({ x: 20, y: window.innerHeight / 2 });
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -114,17 +114,17 @@ const OSDock: React.FC = () => {
       style={{ 
         left: position.x,
         top: position.y,
-        transform: typeof position.y === 'string' ? 'translateY(-50%)' : 'none'
+        transform: 'translateY(-50%)'
       }}
       drag
       dragControls={dragControls}
       dragMomentum={false}
       onDragEnd={(event, info) => {
         // Update position after drag ends
-        setPosition(prev => ({
-          x: typeof prev.x === 'number' ? prev.x + info.offset.x : info.point.x,
-          y: typeof prev.y === 'number' ? prev.y + info.offset.y : info.point.y
-        }));
+        setPosition({
+          x: position.x + info.offset.x,
+          y: position.y + info.offset.y
+        });
       }}
       whileDrag={{ scale: 1.02, boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)' }}
       variants={dockVariants}
