@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useChakra } from '../context/ChakraContext';
 import { supabase } from '../lib/supabase';
 import { LibraryPlaylist } from '../types';
-import { motion } from 'framer-motion';
-import { Plus, Music, Share, Edit, Trash2, Heart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Music, Share, Edit, Trash2, Heart, X } from 'lucide-react';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 

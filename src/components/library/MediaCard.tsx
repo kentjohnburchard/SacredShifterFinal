@@ -70,12 +70,33 @@ const MediaCard: React.FC<MediaCardProps> = ({
     }
   };
   
+  // Check if frequency is a Tesla number (3, 6, 9)
+  const isTeslaNumber = (frequency?: number): boolean => {
+    if (!frequency) return false;
+    const freqStr = frequency.toString();
+    return freqStr.includes('3') || freqStr.includes('6') || freqStr.includes('9');
+  };
+  
   if (viewMode === 'grid') {
     return (
       <motion.div
         className={`bg-dark-200 rounded-2xl border border-dark-300 overflow-hidden cursor-pointer ${className}`}
         whileHover={{ scale: 1.03 }}
         onClick={onClick}
+        animate={{ 
+          boxShadow: item.chakra ? [
+            `0 0 5px ${getChakraColor(item.chakra)}30`,
+            `0 0 10px ${getChakraColor(item.chakra)}40`,
+            `0 0 5px ${getChakraColor(item.chakra)}30`
+          ] : undefined
+        }}
+        transition={{ 
+          boxShadow: { 
+            duration: isTeslaNumber(item.frequency_hz) ? 3.69 : 4,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }
+        }}
       >
         {/* Thumbnail */}
         <div className="relative aspect-video">
@@ -98,15 +119,16 @@ const MediaCard: React.FC<MediaCardProps> = ({
           
           {/* Overlay for play button */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-40">
-            <div 
+            <motion.div 
               className="w-12 h-12 rounded-full flex items-center justify-center"
               style={{ 
                 backgroundColor: getChakraColor(item.chakra),
                 boxShadow: `0 0 20px ${getChakraColor(item.chakra)}80`
               }}
+              whileHover={{ scale: 1.1 }}
             >
               <Play size={24} className="text-white ml-1" />
-            </div>
+            </motion.div>
           </div>
           
           {/* Duration badge */}
@@ -172,6 +194,31 @@ const MediaCard: React.FC<MediaCardProps> = ({
               </div>
             )}
           </div>
+          
+          {/* Tesla frequency indicator */}
+          {isTeslaNumber(item.frequency_hz) && (
+            <motion.div 
+              className="mt-2 text-xs px-2 py-0.5 rounded-full text-center"
+              style={{ 
+                backgroundColor: `${getChakraColor(item.chakra)}20`,
+                color: getChakraColor(item.chakra)
+              }}
+              animate={{ 
+                boxShadow: [
+                  `0 0 3px ${getChakraColor(item.chakra)}`,
+                  `0 0 6px ${getChakraColor(item.chakra)}`,
+                  `0 0 3px ${getChakraColor(item.chakra)}`
+                ]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+            >
+              {item.frequency_hz} Hz Tesla Frequency
+            </motion.div>
+          )}
         </div>
       </motion.div>
     );
@@ -182,6 +229,20 @@ const MediaCard: React.FC<MediaCardProps> = ({
         className={`bg-dark-200 rounded-2xl border border-dark-300 overflow-hidden cursor-pointer ${className}`}
         whileHover={{ scale: 1.01 }}
         onClick={onClick}
+        animate={{ 
+          boxShadow: item.chakra ? [
+            `0 0 5px ${getChakraColor(item.chakra)}30`,
+            `0 0 10px ${getChakraColor(item.chakra)}40`,
+            `0 0 5px ${getChakraColor(item.chakra)}30`
+          ] : undefined
+        }}
+        transition={{ 
+          boxShadow: { 
+            duration: isTeslaNumber(item.frequency_hz) ? 3.69 : 4,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }
+        }}
       >
         <div className="flex p-3">
           {/* Thumbnail */}
@@ -205,15 +266,16 @@ const MediaCard: React.FC<MediaCardProps> = ({
             
             {/* Play button */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-40">
-              <div 
+              <motion.div 
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{ 
                   backgroundColor: getChakraColor(item.chakra),
                   boxShadow: `0 0 10px ${getChakraColor(item.chakra)}80`
                 }}
+                whileHover={{ scale: 1.1 }}
               >
                 <Play size={16} className="text-white ml-0.5" />
-              </div>
+              </motion.div>
             </div>
             
             {/* Lock indicator */}
@@ -266,6 +328,30 @@ const MediaCard: React.FC<MediaCardProps> = ({
                     <Clock size={10} className="mr-1" />
                     {formatDuration(item.duration_seconds)}
                   </div>
+                )}
+                
+                {isTeslaNumber(item.frequency_hz) && (
+                  <motion.div 
+                    className="text-xs px-2 py-0.5 rounded-full"
+                    style={{ 
+                      backgroundColor: `${getChakraColor(item.chakra)}20`,
+                      color: getChakraColor(item.chakra)
+                    }}
+                    animate={{ 
+                      boxShadow: [
+                        `0 0 3px ${getChakraColor(item.chakra)}`,
+                        `0 0 6px ${getChakraColor(item.chakra)}`,
+                        `0 0 3px ${getChakraColor(item.chakra)}`
+                      ]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }}
+                  >
+                    {item.frequency_hz} Hz
+                  </motion.div>
                 )}
               </div>
               

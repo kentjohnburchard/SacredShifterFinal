@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useChakra } from '../context/ChakraContext';
 import { supabase } from '../lib/supabase';
 import { LibraryItem, ChakraType } from '../types';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Grid, List, Filter, Search, Upload, BookOpen, Music, Video, FileText, Image, Lock, Play, Plus, Heart } from 'lucide-react';
 import TattooButton from '../components/ui/TattooButton';
 import SacredHeading from '../components/ui/SacredHeading';
 import MediaCard from '../components/library/MediaCard';
 import ChakraSelector from '../components/ui/ChakraSelector';
+import FloatingFormulas from '../components/ui/FloatingFormulas';
 
 const SacredLibraryPage: React.FC = () => {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ const SacredLibraryPage: React.FC = () => {
   const [timelineFilter, setTimelineFilter] = useState<'all' | 'past' | 'present' | 'future'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'audio' | 'video' | 'pdf' | 'image' | 'text'>('all');
   const [lockedFilter, setLockedFilter] = useState<'all' | 'locked' | 'unlocked'>('all');
+  const [frequencyFilter, setFrequencyFilter] = useState<string>('all');
   
   useEffect(() => {
     fetchLibraryItems();
@@ -35,14 +37,14 @@ const SacredLibraryPage: React.FC = () => {
   
   useEffect(() => {
     applyFilters();
-  }, [items, searchQuery, chakraFilter, timelineFilter, typeFilter, lockedFilter]);
+  }, [items, searchQuery, chakraFilter, timelineFilter, typeFilter, lockedFilter, frequencyFilter]);
   
   const fetchLibraryItems = async () => {
     try {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('library_items')
+        .from('sacred_library_items')
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -95,6 +97,13 @@ const SacredLibraryPage: React.FC = () => {
       );
     }
     
+    // Apply frequency filter
+    if (frequencyFilter !== 'all') {
+      filtered = filtered.filter(item => 
+        item.frequency_hz === parseInt(frequencyFilter)
+      );
+    }
+    
     setFilteredItems(filtered);
   };
   
@@ -108,6 +117,7 @@ const SacredLibraryPage: React.FC = () => {
     setTimelineFilter('all');
     setTypeFilter('all');
     setLockedFilter('all');
+    setFrequencyFilter('all');
   };
   
   const getMediaTypeIcon = (type: string) => {
@@ -126,6 +136,7 @@ const SacredLibraryPage: React.FC = () => {
     const chakras: ChakraType[] = ['Root', 'Sacral', 'SolarPlexus', 'Heart', 'Throat', 'ThirdEye', 'Crown'];
     const timelines = ['past', 'present', 'future'];
     const mediaTypes = ['audio', 'video', 'pdf', 'image', 'text'];
+    const frequencies = [396, 417, 528, 639, 741, 852, 963];
     
     return Array.from({ length: 20 }, (_, i) => ({
       id: `item-${i + 1}`,
@@ -149,9 +160,9 @@ const SacredLibraryPage: React.FC = () => {
       updated_at: new Date(Date.now() - i * 86400000).toISOString(),
       chakra: chakras[i % chakras.length],
       timeline: timelines[i % timelines.length] as 'past' | 'present' | 'future',
-      frequency_hz: [396, 417, 528, 639, 741, 852, 963][i % 7],
+      frequency_hz: frequencies[i % frequencies.length],
       tags: ['meditation', 'healing', 'frequency', 'consciousness', 'awakening'].slice(0, (i % 5) + 1),
-      is_locked: i % 3 === 0,
+      is_locked: i % 5 === 0,
       media_type: mediaTypes[i % mediaTypes.length] as 'audio' | 'video' | 'pdf' | 'image' | 'text',
       duration_seconds: i % 2 === 0 ? (i + 1) * 60 : undefined,
       view_count: Math.floor(Math.random() * 100)
@@ -229,141 +240,172 @@ const SacredLibraryPage: React.FC = () => {
       </div>
       
       {/* Filters */}
-      {showFilters && (
-        <motion.div
-          className="bg-dark-200 p-4 rounded-2xl border border-dark-300 mb-6"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-white">Filters</h2>
-            <button
-              onClick={resetFilters}
-              className="text-sm text-gray-400 hover:text-white"
-            >
-              Reset All
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Chakra</label>
-              <ChakraSelector 
-                value={chakraFilter === 'all' ? undefined : chakraFilter}
-                onChange={(chakra) => setChakraFilter(chakra)}
-                layout="grid"
-              />
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            className="bg-dark-200 p-4 rounded-2xl border border-dark-300 mb-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium text-white">Filters</h2>
               <button
-                onClick={() => setChakraFilter('all')}
-                className="mt-2 text-xs text-gray-400 hover:text-white"
+                onClick={resetFilters}
+                className="text-sm text-gray-400 hover:text-white"
               >
-                Clear
+                Reset All
               </button>
             </div>
             
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Timeline</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['past', 'present', 'future'] as const).map((timeline) => (
-                  <button
-                    key={timeline}
-                    onClick={() => setTimelineFilter(timelineFilter === timeline ? 'all' : timeline)}
-                    className={`p-2 rounded-lg text-center ${
-                      timelineFilter === timeline
-                        ? 'ring-2'
-                        : 'bg-dark-300 hover:bg-dark-400'
-                    }`}
-                    style={{
-                      backgroundColor: timelineFilter === timeline 
-                        ? timeline === 'past' ? '#C6282820' : 
-                          timeline === 'present' ? '#66BB6A20' : 
-                          '#AB47BC20'
-                        : undefined,
-                      color: timelineFilter === timeline 
-                        ? timeline === 'past' ? '#C62828' : 
-                          timeline === 'present' ? '#66BB6A' : 
-                          '#AB47BC'
-                        : 'white',
-                      ringColor: timelineFilter === timeline 
-                        ? timeline === 'past' ? '#C62828' : 
-                          timeline === 'present' ? '#66BB6A' : 
-                          '#AB47BC'
-                        : undefined
-                    }}
-                  >
-                    <div className="font-medium text-sm capitalize">
-                      {timeline}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Media Type</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['audio', 'video', 'pdf', 'image', 'text'] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setTypeFilter(typeFilter === type ? 'all' : type)}
-                    className={`p-2 rounded-lg text-center ${
-                      typeFilter === type
-                        ? 'ring-2'
-                        : 'bg-dark-300 hover:bg-dark-400'
-                    }`}
-                    style={{
-                      backgroundColor: typeFilter === type ? `${chakraState.color}20` : undefined,
-                      ringColor: typeFilter === type ? chakraState.color : undefined
-                    }}
-                  >
-                    <div className="flex flex-col items-center">
-                      {getMediaTypeIcon(type)}
-                      <span className="text-xs mt-1 capitalize">{type}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Access</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setLockedFilter(lockedFilter === 'unlocked' ? 'all' : 'unlocked')}
-                  className={`p-2 rounded-lg text-center ${
-                    lockedFilter === 'unlocked'
-                      ? 'ring-2'
-                      : 'bg-dark-300 hover:bg-dark-400'
-                  }`}
-                  style={{
-                    backgroundColor: lockedFilter === 'unlocked' ? `${chakraState.color}20` : undefined,
-                    ringColor: lockedFilter === 'unlocked' ? chakraState.color : undefined
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Chakra</label>
+                <ChakraSelector 
+                  value={chakraFilter === 'all' ? undefined : chakraFilter}
+                  onChange={(chakra) => {
+                    setChakraFilter(chakra);
+                    activateChakra(chakra);
                   }}
+                  layout="grid"
+                />
+                <button
+                  onClick={() => setChakraFilter('all')}
+                  className="mt-2 text-xs text-gray-400 hover:text-white"
                 >
-                  <div className="font-medium text-sm">Unlocked</div>
+                  Clear
                 </button>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Timeline</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['past', 'present', 'future'] as const).map((timeline) => (
+                    <button
+                      key={timeline}
+                      onClick={() => setTimelineFilter(timelineFilter === timeline ? 'all' : timeline)}
+                      className={`p-2 rounded-lg text-center ${
+                        timelineFilter === timeline
+                          ? 'ring-2'
+                          : 'bg-dark-300 hover:bg-dark-400'
+                      }`}
+                      style={{
+                        backgroundColor: timelineFilter === timeline 
+                          ? timeline === 'past' ? '#C6282820' : 
+                            timeline === 'present' ? '#66BB6A20' : 
+                            '#AB47BC20'
+                          : undefined,
+                        color: timelineFilter === timeline 
+                          ? timeline === 'past' ? '#C62828' : 
+                            timeline === 'present' ? '#66BB6A' : 
+                            '#AB47BC'
+                          : 'white',
+                        ringColor: timelineFilter === timeline 
+                          ? timeline === 'past' ? '#C62828' : 
+                            timeline === 'present' ? '#66BB6A' : 
+                            '#AB47BC'
+                          : undefined
+                      }}
+                    >
+                      <div className="font-medium text-sm capitalize">
+                        {timeline}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Media Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['audio', 'video', 'pdf', 'image', 'text'] as const).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setTypeFilter(typeFilter === type ? 'all' : type)}
+                      className={`p-2 rounded-lg text-center ${
+                        typeFilter === type
+                          ? 'ring-2'
+                          : 'bg-dark-300 hover:bg-dark-400'
+                      }`}
+                      style={{
+                        backgroundColor: typeFilter === type ? `${chakraState.color}20` : undefined,
+                        ringColor: typeFilter === type ? chakraState.color : undefined
+                      }}
+                    >
+                      <div className="flex flex-col items-center">
+                        {getMediaTypeIcon(type)}
+                        <span className="text-xs mt-1 capitalize">{type}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Tesla Frequency</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[396, 417, 528, 639, 741, 852, 963].map((freq) => (
+                      <button
+                        key={freq}
+                        onClick={() => setFrequencyFilter(frequencyFilter === freq.toString() ? 'all' : freq.toString())}
+                        className={`p-2 rounded-lg text-center ${
+                          frequencyFilter === freq.toString()
+                            ? 'ring-2'
+                            : 'bg-dark-300 hover:bg-dark-400'
+                        }`}
+                        style={{
+                          backgroundColor: frequencyFilter === freq.toString() ? `${chakraState.color}20` : undefined,
+                          ringColor: frequencyFilter === freq.toString() ? chakraState.color : undefined
+                        }}
+                      >
+                        <div className="text-sm font-medium">{freq}</div>
+                        <div className="text-xs mt-0.5 opacity-80">Hz</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
-                <button
-                  onClick={() => setLockedFilter(lockedFilter === 'locked' ? 'all' : 'locked')}
-                  className={`p-2 rounded-lg text-center ${
-                    lockedFilter === 'locked'
-                      ? 'ring-2'
-                      : 'bg-dark-300 hover:bg-dark-400'
-                  }`}
-                  style={{
-                    backgroundColor: lockedFilter === 'locked' ? `${chakraState.color}20` : undefined,
-                    ringColor: lockedFilter === 'locked' ? chakraState.color : undefined
-                  }}
-                >
-                  <div className="font-medium text-sm">Locked</div>
-                </button>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Access</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setLockedFilter(lockedFilter === 'unlocked' ? 'all' : 'unlocked')}
+                      className={`p-2 rounded-lg text-center ${
+                        lockedFilter === 'unlocked'
+                          ? 'ring-2'
+                          : 'bg-dark-300 hover:bg-dark-400'
+                      }`}
+                      style={{
+                        backgroundColor: lockedFilter === 'unlocked' ? `${chakraState.color}20` : undefined,
+                        ringColor: lockedFilter === 'unlocked' ? chakraState.color : undefined
+                      }}
+                    >
+                      <div className="font-medium text-sm">Unlocked</div>
+                    </button>
+                    
+                    <button
+                      onClick={() => setLockedFilter(lockedFilter === 'locked' ? 'all' : 'locked')}
+                      className={`p-2 rounded-lg text-center ${
+                        lockedFilter === 'locked'
+                          ? 'ring-2'
+                          : 'bg-dark-300 hover:bg-dark-400'
+                      }`}
+                      style={{
+                        backgroundColor: lockedFilter === 'locked' ? `${chakraState.color}20` : undefined,
+                        ringColor: lockedFilter === 'locked' ? chakraState.color : undefined
+                      }}
+                    >
+                      <div className="font-medium text-sm">Locked</div>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Quick links */}
       <div className="flex overflow-x-auto space-x-3 mb-6 pb-2">
@@ -422,6 +464,15 @@ const SacredLibraryPage: React.FC = () => {
         >
           Future Timeline
         </TattooButton>
+        
+        <TattooButton
+          onClick={() => setFrequencyFilter('528')}
+          chakraColor={chakraState.color}
+          variant="outline"
+          size="sm"
+        >
+          528 Hz
+        </TattooButton>
       </div>
       
       {/* Content */}
@@ -450,7 +501,7 @@ const SacredLibraryPage: React.FC = () => {
           <BookOpen size={48} className="mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-medium text-white mb-2">No items found</h2>
           <p className="text-gray-400 mb-6">
-            {searchQuery || chakraFilter !== 'all' || timelineFilter !== 'all' || typeFilter !== 'all' || lockedFilter !== 'all'
+            {searchQuery || chakraFilter !== 'all' || timelineFilter !== 'all' || typeFilter !== 'all' || lockedFilter !== 'all' || frequencyFilter !== 'all'
               ? 'Try adjusting your filters or search query'
               : 'The sacred library is empty. Be the first to contribute!'}
           </p>
@@ -464,6 +515,11 @@ const SacredLibraryPage: React.FC = () => {
           </TattooButton>
         </div>
       )}
+      
+      {/* Background elements */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <FloatingFormulas density="low" />
+      </div>
     </div>
   );
 };
